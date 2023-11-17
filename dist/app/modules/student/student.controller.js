@@ -13,8 +13,8 @@ exports.StudentControllers = void 0;
 const student_service_1 = require("./student.service");
 const createStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const student = req.body;
-        const result = yield student_service_1.StudentServices.createStudentIntoDB(student);
+        const { student: studentData } = req.body;
+        const result = yield student_service_1.StudentServices.createStudentIntoDB(studentData);
         res.status(200).json({
             success: true,
             message: 'Student create Successfully',
