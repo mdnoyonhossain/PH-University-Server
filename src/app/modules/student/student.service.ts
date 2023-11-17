@@ -6,6 +6,18 @@ const createStudentIntoDB = async (student: Student) => {
     return result;
 }
 
+const getAllStudentFromDB = async () => {
+    const result = await StudentModal.find();
+    return result;
+}
+
+const getSingleStudentFromDB = async (id: string) => {
+    const result = await StudentModal.findOne({id: id});
+    return result;
+}
+
 export const StudentServices = {
-    createStudentIntoDB
+    createStudentIntoDB,
+    getAllStudentFromDB,
+    getSingleStudentFromDB
 }
