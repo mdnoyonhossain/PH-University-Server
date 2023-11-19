@@ -1,7 +1,11 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StudentModal = void 0;
 const mongoose_1 = require("mongoose");
+const validator_1 = __importDefault(require("validator"));
 const userNameSchema = new mongoose_1.Schema({
     firstName: {
         type: String,
@@ -17,7 +21,15 @@ const userNameSchema = new mongoose_1.Schema({
         }
     },
     middleName: { type: String, trim: true },
-    lastName: { type: String, required: true, trim: true },
+    lastName: {
+        type: String,
+        required: true,
+        trim: true,
+        validate: {
+            validator: (value) => validator_1.default.isAlpha(value),
+            message: '{VALUE} is not valid'
+        }
+    },
 });
 const guardianSchema = new mongoose_1.Schema({
     fatherName: { type: String, required: true },
@@ -44,7 +56,14 @@ const studenSchema = new mongoose_1.Schema({
         },
         required: true
     },
-    email: { type: String, required: true },
+    email: {
+        type: String,
+        required: true,
+        validate: {
+            validator: (value) => validator_1.default.isEmail(value),
+            message: '{VALUE} is not a valid email type'
+        }
+    },
     contactNo: { type: String, required: true },
     emergancyContactNo: { type: String, required: true },
     bloodGroup: { type: String, enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] },
