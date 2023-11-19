@@ -22,7 +22,11 @@ const createStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         });
     }
     catch (err) {
-        console.log(err);
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong!",
+            error: err
+        });
     }
 });
 const getAllStudens = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

@@ -3,9 +3,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.StudentModal = void 0;
 const mongoose_1 = require("mongoose");
 const userNameSchema = new mongoose_1.Schema({
-    firstName: { type: String, required: [true, 'First Name is required'] },
-    middleName: { type: String },
-    lastName: { type: String, required: true },
+    firstName: {
+        type: String,
+        required: [true, 'First Name is required'],
+        maxlength: [20, "First Name can't be more than 20 chracter"],
+        trim: true,
+        validate: {
+            validator: function (value) {
+                const firstName = value.charAt(0).toUpperCase() + value.slice(1);
+                return firstName === value;
+            },
+            message: '{VALUE} is not in Captlize fromate'
+        }
+    },
+    middleName: { type: String, trim: true },
+    lastName: { type: String, required: true, trim: true },
 });
 const guardianSchema = new mongoose_1.Schema({
     fatherName: { type: String, required: true },

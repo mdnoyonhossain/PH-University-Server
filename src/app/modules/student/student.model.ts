@@ -2,9 +2,21 @@ import { Schema, model } from "mongoose";
 import { Guardian, LocalGuardian, Student, UserName } from "./student.interface";
 
 const userNameSchema = new Schema<UserName>({
-    firstName: { type: String, required: [true, 'First Name is required'] },
-    middleName: { type: String },
-    lastName: { type: String, required: true },
+    firstName: {
+        type: String,
+        required: [true, 'First Name is required'],
+        maxlength: [20, "First Name can't be more than 20 chracter"],
+        trim: true,
+        validate: {
+            validator: function (value: string) {
+                const firstName = value.charAt(0).toUpperCase() + value.slice(1);
+                return firstName === value;
+            },
+            message: '{VALUE} is not in Captlize fromate'
+        }
+    },
+    middleName: { type: String, trim: true },
+    lastName: { type: String, required: true, trim: true },
 });
 
 const guardianSchema = new Schema<Guardian>({
