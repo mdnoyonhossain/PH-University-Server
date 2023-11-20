@@ -1,18 +1,25 @@
-import { Student } from "./student.interface";
-import { StudentModal } from "./student.model";
+import { TStudent } from "./student.interface";
+import { Student } from "./student.model";
 
-const createStudentIntoDB = async (student: Student) => {
-    const result = await StudentModal.create(student);
+const createStudentIntoDB = async (studentData: TStudent) => {
+    // const result = await StudentModal.create(student);
+    const student = new Student(studentData);
+    
+    if(await student.isExistsUser(studentData.id)){
+        throw new Error('User Already exists!')        
+    }
+
+    const result = await student.save(); // build in instace method
     return result;
 }
 
 const getAllStudentFromDB = async () => {
-    const result = await StudentModal.find();
+    const result = await Student.find();
     return result;
 }
 
 const getSingleStudentFromDB = async (id: string) => {
-    const result = await StudentModal.findOne({id: id});
+    const result = await Student.findOne({ id: id });
     return result;
 }
 
