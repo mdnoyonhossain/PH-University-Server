@@ -39,8 +39,14 @@ export type TStudent = {
     isActive: "Active" | "Blocked";
 }
 
+// CREATE CUSTOM STATIC METHOD
+export interface StudentModel extends Model<TStudent> {
+    isExistsUser(id: string): Promise<TStudent | null>
+  }
+
+/******* FOR CREATING CUSTOM INSTANCE
 export type TStudentMethod = {
     isExistsUser(id: string): Promise<TStudent | null>
 }
-
 export type TStudentModel = Model<TStudent, Record<string, never>, TStudentMethod>
+**********/

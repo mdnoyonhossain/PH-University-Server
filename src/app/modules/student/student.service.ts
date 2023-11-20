@@ -2,14 +2,16 @@ import { TStudent } from "./student.interface";
 import { Student } from "./student.model";
 
 const createStudentIntoDB = async (studentData: TStudent) => {
-    // const result = await StudentModal.create(student);
-    const student = new Student(studentData);
+    const result = await Student.create(studentData);
     
-    if(await student.isExistsUser(studentData.id)){
-        throw new Error('User Already exists!')        
-    }
+    /*****  CUSTOM INSTANCE METHOD
+    // const student = new Student(studentData);    
+    // if(await student.isExistsUser(studentData.id)){
+    //     throw new Error('User Already exists!')        
+    // }
+    // const result = await student.save(); // build in instace method
+    *****/
 
-    const result = await student.save(); // build in instace method
     return result;
 }
 

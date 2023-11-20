@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 import validator from 'validator';
-import { TGuardian, TLocalGuardian, TStudent, TStudentMethod, TStudentModel, TUserName } from "./student.interface";
+import { StudentModel, TGuardian, TLocalGuardian, TStudent, TUserName } from "./student.interface";
 
 const userNameSchema = new Schema<TUserName>({
     firstName: {
@@ -44,7 +44,7 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
     address: { type: String, required: true }
 })
 
-const studenSchema = new Schema<TStudent, TStudentModel, TStudentMethod>({
+const studenSchema = new Schema<TStudent, StudentModel>({
     id: { type: String, required: true, unique: true },
     name: { type: userNameSchema, required: true },
     gender: {
@@ -74,10 +74,18 @@ const studenSchema = new Schema<TStudent, TStudentModel, TStudentMethod>({
     isActive: { type: String, enum: ["Active", "Blocked"], default: "Active" }
 });
 
-
-studenSchema.methods.isUserExists = async function (id: string) {
-    const existingUser = await Student.findOne({id: id});
+// CREATE CUSTOM STATIC METHOD
+studenSchema.statics.isExistsUser = async function (id: string) {
+    const existingUser = await Student.findOne({id});
     return existingUser;
 }
 
-export const Student = model<TStudent, TStudentModel>('Student', studenSchema);
+/*** CREATE CUSTOM INSTANCE METHOD
+// studenSchema.methods.isExistsUser = async function (id: string) {
+//     const existingUser = await Student.findOne({ id: id });
+//     return existingUser;
+// }
+
+ *****/
+
+export const Student = model<TStudent>('Student', studenSchema);

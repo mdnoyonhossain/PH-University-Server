@@ -83,10 +83,18 @@ const studenSchema = new mongoose_1.Schema({
     profileImg: { type: String, required: true },
     isActive: { type: String, enum: ["Active", "Blocked"], default: "Active" }
 });
-studenSchema.methods.isUserExists = function (id) {
+// CREATE CUSTOM STATIC METHOD
+studenSchema.statics.isExistsUser = function (id) {
     return __awaiter(this, void 0, void 0, function* () {
-        const existingUser = yield exports.Student.findOne({ id: id });
+        const existingUser = yield exports.Student.findOne({ id });
         return existingUser;
     });
 };
+/*** CREATE CUSTOM INSTANCE METHOD
+// studenSchema.methods.isExistsUser = async function (id: string) {
+//     const existingUser = await Student.findOne({ id: id });
+//     return existingUser;
+// }
+
+ *****/
 exports.Student = (0, mongoose_1.model)('Student', studenSchema);

@@ -12,12 +12,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.StudentServices = void 0;
 const student_model_1 = require("./student.model");
 const createStudentIntoDB = (studentData) => __awaiter(void 0, void 0, void 0, function* () {
-    // const result = await StudentModal.create(student);
-    const student = new student_model_1.Student(studentData);
-    if (yield student.isExistsUser(studentData.id)) {
-        throw new Error('User Already exists!');
-    }
-    const result = yield student.save(); // build in instace method
+    const result = yield student_model_1.Student.create(studentData);
+    /*****  CUSTOM INSTANCE METHOD
+    // const student = new Student(studentData);
+    // if(await student.isExistsUser(studentData.id)){
+    //     throw new Error('User Already exists!')
+    // }
+    // const result = await student.save(); // build in instace method
+    *****/
     return result;
 });
 const getAllStudentFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
