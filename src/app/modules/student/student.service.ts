@@ -3,7 +3,7 @@ import { Student } from "./student.model";
 
 const createStudentIntoDB = async (studentData: TStudent) => {
     const result = await Student.create(studentData);
-        
+
     /*****  CUSTOM INSTANCE METHOD
     // const student = new Student(studentData);    
     // if(await student.isExistsUser(studentData.id)){
@@ -21,12 +21,21 @@ const getAllStudentFromDB = async () => {
 }
 
 const getSingleStudentFromDB = async (id: string) => {
-    const result = await Student.findOne({ id: id });
+    // const result = await Student.findOne({ id: id });
+    const result = await Student.aggregate([
+        { $match: { id: id } }
+    ])
+    return result;
+}
+
+const deleteStudentFromDB = async (id: string) => {
+    const result = await Student.updateOne({ id: id }, { isDeleted: true });
     return result;
 }
 
 export const StudentServices = {
     createStudentIntoDB,
     getAllStudentFromDB,
-    getSingleStudentFromDB
+    getSingleStudentFromDB,
+    deleteStudentFromDB
 }

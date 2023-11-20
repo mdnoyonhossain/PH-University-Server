@@ -38,6 +38,7 @@ export type TStudent = {
     localGuardian: TLocalGuardian;
     profileImg: string;
     isActive: "Active" | "Blocked";
+    isDeleted: boolean;
 }
 
 // CREATE CUSTOM STATIC METHOD

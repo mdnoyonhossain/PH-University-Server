@@ -22,13 +22,13 @@ const userNameSchema = new mongoose_1.Schema({
         required: [true, 'First Name is required'],
         maxlength: [20, "First Name can't be more than 20 chracter"],
         trim: true,
-        // validate: {
-        //     validator: function (value: string) {
-        //         const firstName = value.charAt(0).toUpperCase() + value.slice(1);
-        //         return firstName === value;
-        //     },
-        //     message: '{VALUE} is not in Captlize fromate'
-        // }
+        validate: {
+            validator: function (value) {
+                const firstName = value.charAt(0).toUpperCase() + value.slice(1);
+                return firstName === value;
+            },
+            message: '{VALUE} is not in Captlize fromate'
+        }
     },
     middleName: { type: String, trim: true },
     lastName: {
@@ -83,7 +83,27 @@ const studenSchema = new mongoose_1.Schema({
     guardian: { type: guardianSchema, required: true },
     localGuardian: { type: localGuardianSchema, required: true },
     profileImg: { type: String, required: true },
-    isActive: { type: String, enum: ["Active", "Blocked"], default: "Active" }
+    isActive: { type: String, enum: ["Active", "Blocked"], default: "Active" },
+    isDeleted: { type: Boolean, default: false }
+});
+// Query Middleware/ Hook
+studenSchema.pre('find', function (next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        this.find({ isDeleted: { $ne: true } });
+        next();
+    });
+});
+studenSchema.pre('findOne', function (next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        this.findOne({ isDeleted: { $ne: true } });
+        next();
+    });
+});
+studenSchema.pre('aggregate', function (next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
+        next();
+    });
 });
 // Pre save Middleware/ hook
 studenSchema.pre('save', function (next) {
