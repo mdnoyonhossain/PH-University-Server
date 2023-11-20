@@ -85,6 +85,14 @@ const studenSchema = new mongoose_1.Schema({
     profileImg: { type: String, required: true },
     isActive: { type: String, enum: ["Active", "Blocked"], default: "Active" },
     isDeleted: { type: Boolean, default: false }
+}, {
+    toJSON: {
+        virtuals: true
+    }
+});
+// virtual
+studenSchema.virtual('fullName').get(function () {
+    return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
 });
 // Query Middleware/ Hook
 studenSchema.pre('find', function (next) {
