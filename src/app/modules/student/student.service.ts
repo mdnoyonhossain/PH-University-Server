@@ -3,7 +3,7 @@ import { Student } from "./student.model";
 
 const createStudentIntoDB = async (studentData: TStudent) => {
     const result = await Student.create(studentData);
-    
+        
     /*****  CUSTOM INSTANCE METHOD
     // const student = new Student(studentData);    
     // if(await student.isExistsUser(studentData.id)){

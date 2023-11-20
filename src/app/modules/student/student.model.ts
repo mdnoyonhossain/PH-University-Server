@@ -1,6 +1,8 @@
 import { Schema, model } from "mongoose";
 import validator from 'validator';
 import { StudentModel, TGuardian, TLocalGuardian, TStudent, TUserName } from "./student.interface";
+import bcrypt from 'bcrypt'
+import { config } from "dotenv";
 
 const userNameSchema = new Schema<TUserName>({
     firstName: {
@@ -46,6 +48,7 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
 
 const studenSchema = new Schema<TStudent, StudentModel>({
     id: { type: String, required: true, unique: true },
+    password: { type: String, required: [true, 'Password is required'], maxlength: [20, 'password can not be more than 20 chrecters'] },
     name: { type: userNameSchema, required: true },
     gender: {
         type: String,
@@ -74,9 +77,29 @@ const studenSchema = new Schema<TStudent, StudentModel>({
     isActive: { type: String, enum: ["Active", "Blocked"], default: "Active" }
 });
 
+
+// Pre save Middleware/ hook
+studenSchema.pre('save', async function (next) {
+    // hasing password save into DB
+    const bcrypt_salt_rounds = 12
+    const user = this;
+
+    user.password = await bcrypt.hash(user.password, bcrypt_salt_rounds)
+    
+    next();
+})
+
+// Post save Middleware/ hook
+studenSchema.post('save', function (doc, next) {
+    doc.password = '';
+
+    next();
+})
+
+
 // CREATE CUSTOM STATIC METHOD
 studenSchema.statics.isExistsUser = async function (id: string) {
-    const existingUser = await Student.findOne({id});
+    const existingUser = await Student.findOne({ id });
     return existingUser;
 }
 

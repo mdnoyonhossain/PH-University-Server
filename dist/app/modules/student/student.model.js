@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Student = void 0;
 const mongoose_1 = require("mongoose");
 const validator_1 = __importDefault(require("validator"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
 const userNameSchema = new mongoose_1.Schema({
     firstName: {
         type: String,
@@ -56,6 +57,7 @@ const localGuardianSchema = new mongoose_1.Schema({
 });
 const studenSchema = new mongoose_1.Schema({
     id: { type: String, required: true, unique: true },
+    password: { type: String, required: [true, 'Password is required'], maxlength: [20, 'password can not be more than 20 chrecters'] },
     name: { type: userNameSchema, required: true },
     gender: {
         type: String,
@@ -82,6 +84,21 @@ const studenSchema = new mongoose_1.Schema({
     localGuardian: { type: localGuardianSchema, required: true },
     profileImg: { type: String, required: true },
     isActive: { type: String, enum: ["Active", "Blocked"], default: "Active" }
+});
+// Pre save Middleware/ hook
+studenSchema.pre('save', function (next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // hasing password save into DB
+        const bcrypt_salt_rounds = 12;
+        const user = this;
+        user.password = yield bcrypt_1.default.hash(user.password, bcrypt_salt_rounds);
+        next();
+    });
+});
+// Post save Middleware/ hook
+studenSchema.post('save', function (doc, next) {
+    doc.password = '';
+    next();
 });
 // CREATE CUSTOM STATIC METHOD
 studenSchema.statics.isExistsUser = function (id) {
