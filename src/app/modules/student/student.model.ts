@@ -8,13 +8,13 @@ const userNameSchema = new Schema<UserName>({
         required: [true, 'First Name is required'],
         maxlength: [20, "First Name can't be more than 20 chracter"],
         trim: true,
-        validate: {
-            validator: function (value: string) {
-                const firstName = value.charAt(0).toUpperCase() + value.slice(1);
-                return firstName === value;
-            },
-            message: '{VALUE} is not in Captlize fromate'
-        }
+        // validate: {
+        //     validator: function (value: string) {
+        //         const firstName = value.charAt(0).toUpperCase() + value.slice(1);
+        //         return firstName === value;
+        //     },
+        //     message: '{VALUE} is not in Captlize fromate'
+        // }
     },
     middleName: { type: String, trim: true },
     lastName: {

@@ -8,13 +8,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StudentControllers = void 0;
 const student_service_1 = require("./student.service");
+const student_validaton_schema_1 = __importDefault(require("./student.validaton.schema"));
 const createStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { student: studentData } = req.body;
-        const result = yield student_service_1.StudentServices.createStudentIntoDB(studentData);
+        // zod validation using
+        const zodParseData = student_validaton_schema_1.default.parse(studentData);
+        const result = yield student_service_1.StudentServices.createStudentIntoDB(zodParseData);
         res.status(200).json({
             success: true,
             message: 'Student create Successfully',
