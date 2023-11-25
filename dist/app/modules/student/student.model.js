@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Student = void 0;
 const mongoose_1 = require("mongoose");
 const validator_1 = __importDefault(require("validator"));
-const bcrypt_1 = __importDefault(require("bcrypt"));
 const userNameSchema = new mongoose_1.Schema({
     firstName: {
         type: String,
@@ -56,8 +55,17 @@ const localGuardianSchema = new mongoose_1.Schema({
     address: { type: String, required: true }
 });
 const studenSchema = new mongoose_1.Schema({
-    id: { type: String, required: true, unique: true },
-    password: { type: String, required: [true, 'Password is required'], maxlength: [20, 'password can not be more than 20 chrecters'] },
+    id: {
+        type: String,
+        required: [true, 'ID is required'],
+        unique: true,
+    },
+    user: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        required: [true, 'User id is required'],
+        unique: true,
+        ref: 'User',
+    },
     name: { type: userNameSchema, required: true },
     gender: {
         type: String,
@@ -83,7 +91,6 @@ const studenSchema = new mongoose_1.Schema({
     guardian: { type: guardianSchema, required: true },
     localGuardian: { type: localGuardianSchema, required: true },
     profileImg: { type: String, required: true },
-    isActive: { type: String, enum: ["Active", "Blocked"], default: "Active" },
     isDeleted: { type: Boolean, default: false }
 }, {
     toJSON: {
@@ -113,21 +120,6 @@ studenSchema.pre('aggregate', function (next) {
         next();
     });
 });
-// Pre save Middleware/ hook
-studenSchema.pre('save', function (next) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // hasing password save into DB
-        const bcrypt_salt_rounds = 12;
-        const user = this;
-        user.password = yield bcrypt_1.default.hash(user.password, bcrypt_salt_rounds);
-        next();
-    });
-});
-// Post save Middleware/ hook
-studenSchema.post('save', function (doc, next) {
-    doc.password = '';
-    next();
-});
 // CREATE CUSTOM STATIC METHOD
 studenSchema.statics.isExistsUser = function (id) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -135,11 +127,4 @@ studenSchema.statics.isExistsUser = function (id) {
         return existingUser;
     });
 };
-/*** CREATE CUSTOM INSTANCE METHOD
-// studenSchema.methods.isExistsUser = async function (id: string) {
-//     const existingUser = await Student.findOne({ id: id });
-//     return existingUser;
-// }
-
- *****/
 exports.Student = (0, mongoose_1.model)('Student', studenSchema);

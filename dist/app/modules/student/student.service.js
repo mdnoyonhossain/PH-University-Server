@@ -11,17 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StudentServices = void 0;
 const student_model_1 = require("./student.model");
-const createStudentIntoDB = (studentData) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield student_model_1.Student.create(studentData);
-    /*****  CUSTOM INSTANCE METHOD
-    // const student = new Student(studentData);
-    // if(await student.isExistsUser(studentData.id)){
-    //     throw new Error('User Already exists!')
-    // }
-    // const result = await student.save(); // build in instace method
-    *****/
-    return result;
-});
 const getAllStudentFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield student_model_1.Student.find();
     return result;
@@ -38,7 +27,6 @@ const deleteStudentFromDB = (id) => __awaiter(void 0, void 0, void 0, function* 
     return result;
 });
 exports.StudentServices = {
-    createStudentIntoDB,
     getAllStudentFromDB,
     getSingleStudentFromDB,
     deleteStudentFromDB

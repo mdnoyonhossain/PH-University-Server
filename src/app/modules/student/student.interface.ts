@@ -1,4 +1,4 @@
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 
 export type TUserName = {
     firstName: string;
@@ -24,6 +24,7 @@ export type TLocalGuardian = {
 
 export type TStudent = {
     id: string;
+    user: Types.ObjectId;
     password: string;
     name: TUserName,
     gender: "Male" | "Female" | "Other",
@@ -37,18 +38,11 @@ export type TStudent = {
     guardian: TGuardian;
     localGuardian: TLocalGuardian;
     profileImg: string;
-    isActive: "Active" | "Blocked";
     isDeleted: boolean;
 }
 
 // CREATE CUSTOM STATIC METHOD
 export interface StudentModel extends Model<TStudent> {
-    isExistsUser(id: string): Promise<TStudent | null>
-  }
-
-/******* FOR CREATING CUSTOM INSTANCE
-export type TStudentMethod = {
+    // eslint-disable-next-line no-unused-vars
     isExistsUser(id: string): Promise<TStudent | null>
 }
-export type TStudentModel = Model<TStudent, Record<string, never>, TStudentMethod>
-**********/

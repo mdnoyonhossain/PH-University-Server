@@ -1,7 +1,6 @@
 import { Schema, model } from "mongoose";
 import validator from 'validator';
 import { StudentModel, TGuardian, TLocalGuardian, TStudent, TUserName } from "./student.interface";
-import bcrypt from 'bcrypt'
 
 const userNameSchema = new Schema<TUserName>({
     firstName: {
@@ -46,8 +45,17 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
 })
 
 const studenSchema = new Schema<TStudent, StudentModel>({
-    id: { type: String, required: true, unique: true },
-    password: { type: String, required: [true, 'Password is required'], maxlength: [20, 'password can not be more than 20 chrecters'] },
+    id: {
+        type: String,
+        required: [true, 'ID is required'],
+        unique: true,
+    },
+    user: {
+        type: Schema.Types.ObjectId,
+        required: [true, 'User id is required'],
+        unique: true,
+        ref: 'User',
+    },
     name: { type: userNameSchema, required: true },
     gender: {
         type: String,
@@ -73,7 +81,6 @@ const studenSchema = new Schema<TStudent, StudentModel>({
     guardian: { type: guardianSchema, required: true },
     localGuardian: { type: localGuardianSchema, required: true },
     profileImg: { type: String, required: true },
-    isActive: { type: String, enum: ["Active", "Blocked"], default: "Active" },
     isDeleted: { type: Boolean, default: false }
 },
     {
@@ -85,45 +92,25 @@ const studenSchema = new Schema<TStudent, StudentModel>({
 
 
 // virtual
-studenSchema.virtual('fullName').get(function(){
+studenSchema.virtual('fullName').get(function () {
     return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
-})
-
+});
 
 // Query Middleware/ Hook
 studenSchema.pre('find', async function (next) {
     this.find({ isDeleted: { $ne: true } })
     next()
-})
+});
 
 studenSchema.pre('findOne', async function (next) {
     this.findOne({ isDeleted: { $ne: true } });
     next();
-})
+});
 
 studenSchema.pre('aggregate', async function (next) {
     this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } })
     next();
 })
-
-// Pre save Middleware/ hook
-studenSchema.pre('save', async function (next) {
-    // hasing password save into DB
-    const bcrypt_salt_rounds = 12
-    const user = this;
-
-    user.password = await bcrypt.hash(user.password, bcrypt_salt_rounds)
-
-    next();
-})
-
-// Post save Middleware/ hook
-studenSchema.post('save', function (doc, next) {
-    doc.password = '';
-
-    next();
-})
-
 
 // CREATE CUSTOM STATIC METHOD
 studenSchema.statics.isExistsUser = async function (id: string) {
@@ -131,12 +118,4 @@ studenSchema.statics.isExistsUser = async function (id: string) {
     return existingUser;
 }
 
-/*** CREATE CUSTOM INSTANCE METHOD
-// studenSchema.methods.isExistsUser = async function (id: string) {
-//     const existingUser = await Student.findOne({ id: id });
-//     return existingUser;
-// }
-
- *****/
-
-export const Student = model<TStudent>('Student', studenSchema);
+export const Student = model<TStudent, StudentModel>('Student', studenSchema);
