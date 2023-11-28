@@ -5,8 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
-const globalErrorHandler_1 = __importDefault(require("./app/middlwares/globalErrorHandler"));
+const globalErrorHandler_1 = __importDefault(require("./app/middlewares/globalErrorHandler"));
 const routes_1 = __importDefault(require("./app/routes"));
+const notFound_1 = __importDefault(require("./app/middlewares/notFound"));
 const app = (0, express_1.default)();
 // Parsers
 app.use(express_1.default.json());
@@ -18,4 +19,6 @@ app.get('/', (req, res) => {
 });
 // Global Error Handler
 app.use(globalErrorHandler_1.default);
+// Not Found
+app.use(notFound_1.default);
 exports.default = app;

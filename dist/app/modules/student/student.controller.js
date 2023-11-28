@@ -8,13 +8,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StudentControllers = void 0;
 const student_service_1 = require("./student.service");
+const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
+const http_status_1 = __importDefault(require("http-status"));
 const getAllStudens = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const result = yield student_service_1.StudentServices.getAllStudentFromDB();
-        res.status(200).json({
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_1.default.OK,
             success: true,
             message: 'Student are Retrived Successfully',
             data: result
@@ -28,7 +34,8 @@ const getSingleStudent = (req, res, next) => __awaiter(void 0, void 0, void 0, f
     try {
         const { studentId } = req.params;
         const result = yield student_service_1.StudentServices.getSingleStudentFromDB(studentId);
-        res.status(200).json({
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_1.default.OK,
             success: true,
             message: 'Student are Specfic Student Successfully',
             data: result
@@ -42,7 +49,8 @@ const deleteStudent = (req, res, next) => __awaiter(void 0, void 0, void 0, func
     try {
         const { studentId } = req.params;
         const result = yield student_service_1.StudentServices.deleteStudentFromDB(studentId);
-        res.status(200).json({
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_1.default.OK,
             success: true,
             message: 'Student Delete Successfully',
             data: result
