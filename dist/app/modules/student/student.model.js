@@ -75,6 +75,7 @@ const studenSchema = new mongoose_1.Schema({
         },
         required: true
     },
+    dateOfBirth: { type: Date },
     email: {
         type: String,
         required: true,
@@ -90,8 +91,11 @@ const studenSchema = new mongoose_1.Schema({
     permanentAddress: { type: String, required: true },
     guardian: { type: guardianSchema, required: true },
     localGuardian: { type: localGuardianSchema, required: true },
+    admissionSemester: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: 'AcademicSemester',
+    },
     profileImg: { type: String, required: true },
-    isDeleted: { type: Boolean, default: false }
 }, {
     toJSON: {
         virtuals: true

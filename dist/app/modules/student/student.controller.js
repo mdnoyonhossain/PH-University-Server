@@ -16,50 +16,36 @@ exports.StudentControllers = void 0;
 const student_service_1 = require("./student.service");
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const http_status_1 = __importDefault(require("http-status"));
-const getAllStudens = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const result = yield student_service_1.StudentServices.getAllStudentFromDB();
-        (0, sendResponse_1.default)(res, {
-            statusCode: http_status_1.default.OK,
-            success: true,
-            message: 'Student are Retrived Successfully',
-            data: result
-        });
-    }
-    catch (err) {
-        next(err);
-    }
-});
-const getSingleStudent = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { studentId } = req.params;
-        const result = yield student_service_1.StudentServices.getSingleStudentFromDB(studentId);
-        (0, sendResponse_1.default)(res, {
-            statusCode: http_status_1.default.OK,
-            success: true,
-            message: 'Student are Specfic Student Successfully',
-            data: result
-        });
-    }
-    catch (err) {
-        next(err);
-    }
-});
-const deleteStudent = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { studentId } = req.params;
-        const result = yield student_service_1.StudentServices.deleteStudentFromDB(studentId);
-        (0, sendResponse_1.default)(res, {
-            statusCode: http_status_1.default.OK,
-            success: true,
-            message: 'Student Delete Successfully',
-            data: result
-        });
-    }
-    catch (err) {
-        next(err);
-    }
-});
+const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
+const getAllStudens = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield student_service_1.StudentServices.getAllStudentFromDB();
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Student are Retrived Successfully',
+        data: result
+    });
+}));
+const getSingleStudent = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { studentId } = req.params;
+    const result = yield student_service_1.StudentServices.getSingleStudentFromDB(studentId);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Student are Specfic Student Successfully',
+        data: result
+    });
+}));
+const deleteStudent = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { studentId } = req.params;
+    const result = yield student_service_1.StudentServices.deleteStudentFromDB(studentId);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Student Delete Successfully',
+        data: result
+    });
+}));
 exports.StudentControllers = {
     getAllStudens,
     getSingleStudent,
