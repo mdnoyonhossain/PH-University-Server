@@ -65,6 +65,7 @@ const studenSchema = new Schema<TStudent, StudentModel>({
         },
         required: true
     },
+    dateOfBirth: { type: Date },
     email: {
         type: String,
         required: true,
@@ -80,8 +81,11 @@ const studenSchema = new Schema<TStudent, StudentModel>({
     permanentAddress: { type: String, required: true },
     guardian: { type: guardianSchema, required: true },
     localGuardian: { type: localGuardianSchema, required: true },
+    admissionSemester: {
+        type: Schema.Types.ObjectId,
+        ref: 'AcademicSemester',
+    },
     profileImg: { type: String, required: true },
-    isDeleted: { type: Boolean, default: false }
 },
     {
         toJSON: {
