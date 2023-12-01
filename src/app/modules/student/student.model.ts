@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 import validator from 'validator';
-import { StudentModel, TGuardian, TLocalGuardian, TStudent, TUserName } from "./student.interface";
+import { TGuardian, TLocalGuardian, TStudent, TStudentModel, TUserName } from "./student.interface";
 
 const userNameSchema = new Schema<TUserName>({
     firstName: {
@@ -44,7 +44,7 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
     address: { type: String, required: true }
 })
 
-const studenSchema = new Schema<TStudent, StudentModel>({
+const studenSchema = new Schema<TStudent, TStudentModel>({
     id: {
         type: String,
         required: [true, 'ID is required'],
@@ -86,6 +86,11 @@ const studenSchema = new Schema<TStudent, StudentModel>({
         ref: 'AcademicSemester',
     },
     profileImg: { type: String, required: true },
+    isDeleted: { type: Boolean, default: false },
+    academicDepartment: {
+        type: Schema.Types.ObjectId,
+        ref: 'AcademicDepartment',
+    }
 },
     {
         toJSON: {
@@ -122,4 +127,4 @@ studenSchema.statics.isExistsUser = async function (id: string) {
     return existingUser;
 }
 
-export const Student = model<TStudent, StudentModel>('Student', studenSchema);
+export const Student = model<TStudent, TStudentModel>('Student', studenSchema);

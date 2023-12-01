@@ -36,6 +36,17 @@ const getSingleStudent = (0, catchAsync_1.default)((req, res) => __awaiter(void 
         data: result
     });
 }));
+const updateStudent = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { studentId } = req.params;
+    const { student } = req.body;
+    const result = yield student_service_1.StudentServices.updateStudentIntoDB(studentId, student);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Student is updated Successfully',
+        data: result
+    });
+}));
 const deleteStudent = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { studentId } = req.params;
     const result = yield student_service_1.StudentServices.deleteStudentFromDB(studentId);
@@ -49,5 +60,6 @@ const deleteStudent = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, 
 exports.StudentControllers = {
     getAllStudens,
     getSingleStudent,
+    updateStudent,
     deleteStudent
 };

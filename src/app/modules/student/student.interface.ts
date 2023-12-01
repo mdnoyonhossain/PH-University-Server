@@ -38,12 +38,13 @@ export type TStudent = {
     guardian: TGuardian;
     localGuardian: TLocalGuardian;
     admissionSemester: Types.ObjectId;
+    academicDepartment: Types.ObjectId;
     profileImg: string;
     isDeleted: boolean;
 }
 
 // CREATE CUSTOM STATIC METHOD
-export interface StudentModel extends Model<TStudent> {
+export interface TStudentModel extends Model<TStudent> {
     // eslint-disable-next-line no-unused-vars
     isExistsUser(id: string): Promise<TStudent | null>
 }

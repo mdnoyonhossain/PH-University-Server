@@ -8,26 +8,90 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StudentServices = void 0;
+const mongoose_1 = __importDefault(require("mongoose"));
 const student_model_1 = require("./student.model");
+const AppError_1 = __importDefault(require("../../errors/AppError"));
+const http_status_1 = __importDefault(require("http-status"));
+const user_model_1 = require("../user/user.model");
 const getAllStudentFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield student_model_1.Student.find();
+    const result = yield student_model_1.Student.find().populate('admissionSemester').populate({
+        path: 'academicDepartment',
+        populate: 'academicFaculty'
+    });
     return result;
 });
 const getSingleStudentFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    // const result = await Student.findOne({ id: id });
-    const result = yield student_model_1.Student.aggregate([
-        { $match: { id: id } }
-    ]);
+    const result = yield student_model_1.Student.findOne({ id: id }).populate('admissionSemester').populate({
+        path: 'academicDepartment',
+        populate: 'academicFaculty'
+    });
+    return result;
+});
+const updateStudentIntoDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const { name, guardian, localGuardian } = payload, remainingStudentData = __rest(payload, ["name", "guardian", "localGuardian"]);
+    const modifiedUpdateData = Object.assign({}, remainingStudentData);
+    if (name && Object.keys(name).length) {
+        for (const [key, value] of Object.entries(name)) {
+            modifiedUpdateData[`name.${key}`] = value;
+        }
+    }
+    if (guardian && Object.keys(guardian).length) {
+        for (const [key, value] of Object.entries(guardian)) {
+            modifiedUpdateData[`guardian.${key}`] = value;
+        }
+    }
+    if (localGuardian && Object.keys(localGuardian).length) {
+        for (const [key, value] of Object.entries(localGuardian)) {
+            modifiedUpdateData[`localGuardian.${key}`] = value;
+        }
+    }
+    console.log(modifiedUpdateData);
+    const result = yield student_model_1.Student.findOneAndUpdate({ id }, modifiedUpdateData, { new: true, runValidators: true });
     return result;
 });
 const deleteStudentFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield student_model_1.Student.updateOne({ id: id }, { isDeleted: true });
-    return result;
+    const session = yield mongoose_1.default.startSession();
+    try {
+        session.startTransaction();
+        // delete sutdent
+        const deletedStudent = yield student_model_1.Student.findOneAndUpdate({ id }, { isDeleted: true }, { new: true, session });
+        if (!deletedStudent) {
+            throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Failed to delete student');
+        }
+        // delete user
+        const deletedUser = yield user_model_1.User.findOneAndUpdate({ id }, { isDeleted: true }, { new: true, session });
+        if (!deletedUser) {
+            throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Failed to delete user');
+        }
+        yield session.commitTransaction();
+        yield session.endSession();
+        return deletedStudent;
+    }
+    catch (err) {
+        yield session.abortTransaction();
+        yield session.endSession();
+        throw new Error('Faield to delete Student');
+    }
 });
 exports.StudentServices = {
     getAllStudentFromDB,
     getSingleStudentFromDB,
+    updateStudentIntoDB,
     deleteStudentFromDB
 };

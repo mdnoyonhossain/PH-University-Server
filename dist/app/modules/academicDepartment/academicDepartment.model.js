@@ -12,40 +12,37 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AcademicSemester = void 0;
+exports.AcademicDepartment = void 0;
 const mongoose_1 = require("mongoose");
-const academicSemester_constant_1 = require("./academicSemester.constant");
 const AppError_1 = __importDefault(require("../../errors/AppError"));
 const http_status_1 = __importDefault(require("http-status"));
-const academicSemesterSchema = new mongoose_1.Schema({
-    name: { type: String, enum: academicSemester_constant_1.AcademicSemesterName, required: true },
-    code: { type: String, enum: academicSemester_constant_1.AcademicSemesterCode, required: true },
-    year: { type: String, required: true },
-    startMonth: { type: String, enum: academicSemester_constant_1.Months, required: true },
-    endMonth: { type: String, enum: academicSemester_constant_1.Months, required: true }
+const academicDepartmentSchema = new mongoose_1.Schema({
+    name: { type: String, unique: true, required: true },
+    academicFaculty: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: 'AcademicFaculty'
+    }
 }, {
     timestamps: true
 });
-academicSemesterSchema.pre('save', function (next) {
+academicDepartmentSchema.pre('save', function (next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const isSemesterExists = yield exports.AcademicSemester.findOne({
-            name: this.name,
-            year: this.year
-        });
-        if (isSemesterExists) {
-            throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Semester is Already Exists');
+        const isDepartmentExists = yield exports.AcademicDepartment.findOne({ name: this.name });
+        if (isDepartmentExists) {
+            throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'This Department is Already Exists!');
         }
         next();
     });
 });
-academicSemesterSchema.pre('findOneAndUpdate', function (next) {
+// query middleware
+academicDepartmentSchema.pre('findOneAndUpdate', function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = this.getQuery();
-        const isSemesterExists = yield exports.AcademicSemester.findOne(query);
-        if (!isSemesterExists) {
-            throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'This Semester dose not Exists!');
+        const isDepartmentExists = yield exports.AcademicDepartment.findOne(query);
+        if (!isDepartmentExists) {
+            throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'This Department dose not Exists!');
         }
         next();
     });
 });
-exports.AcademicSemester = (0, mongoose_1.model)('AcademicSemester', academicSemesterSchema);
+exports.AcademicDepartment = (0, mongoose_1.model)('AcademicDepartment', academicDepartmentSchema);
