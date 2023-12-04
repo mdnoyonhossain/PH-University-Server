@@ -29,11 +29,56 @@ const student_model_1 = require("./student.model");
 const AppError_1 = __importDefault(require("../../errors/AppError"));
 const http_status_1 = __importDefault(require("http-status"));
 const user_model_1 = require("../user/user.model");
-const getAllStudentFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield student_model_1.Student.find().populate('admissionSemester').populate({
+const QueryBuilder_1 = __importDefault(require("../../builder/QueryBuilder"));
+const student_constant_1 = require("./student.constant");
+const getAllStudentFromDB = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    // const queryObj = { ...query };
+    // const studentSearchAbleField = ['email', 'presentAddress', 'name.firstName'];
+    // let searchTerm = '';
+    // if (query?.searchTerm) {
+    //     searchTerm = query?.searchTerm as string;
+    // }
+    // const searchQuery = Student.find({
+    //     $or: studentSearchAbleField.map(field => ({
+    //         [field]: { $regex: searchTerm, $options: 'i' }
+    //     }))
+    // });
+    // const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
+    // excludeFields.forEach(el => delete queryObj[el]); // query filter
+    // const filterQuery = searchQuery.find(queryObj)
+    //     .populate('admissionSemester').populate({
+    //         path: 'academicDepartment',
+    //         populate: 'academicFaculty'
+    //     });
+    // let sort = '-createdAt';
+    // if (query?.sort) {
+    //     sort = query?.sort as string;
+    // }
+    // const sortQuery = filterQuery.sort(sort);
+    // let page = 1;
+    // let limit = 1;
+    // let skip = 0;
+    // if (query?.limit) {
+    //     limit = Number(query?.limit);
+    // }
+    // if (query.page) {
+    //     page = Number(query?.page);
+    //     skip = (page - 1) * limit
+    // }
+    // const paginateQuery = sortQuery.skip(skip);
+    // const limitQuery = paginateQuery.limit(limit);
+    // // fields limiting
+    // let fields = '-__v';
+    // if(query.fields){
+    //     fields = (query.fields as string).split(',').join(' ');
+    // }
+    // const fieldQuery = await limitQuery.select(fields);
+    // return fieldQuery;
+    const studentQuery = new QueryBuilder_1.default(student_model_1.Student.find().populate('admissionSemester').populate({
         path: 'academicDepartment',
         populate: 'academicFaculty'
-    });
+    }), query).search(student_constant_1.studentSearchableField).filter().sort().paginate().fields();
+    const result = yield studentQuery.modelQuery;
     return result;
 });
 const getSingleStudentFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
@@ -61,7 +106,6 @@ const updateStudentIntoDB = (id, payload) => __awaiter(void 0, void 0, void 0, f
             modifiedUpdateData[`localGuardian.${key}`] = value;
         }
     }
-    console.log(modifiedUpdateData);
     const result = yield student_model_1.Student.findOneAndUpdate({ id }, modifiedUpdateData, { new: true, runValidators: true });
     return result;
 });

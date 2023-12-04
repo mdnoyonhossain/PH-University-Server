@@ -102,7 +102,7 @@ const studenSchema = new Schema<TStudent, TStudentModel>({
 
 // virtual
 studenSchema.virtual('fullName').get(function () {
-    return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
+    return `${this?.name?.firstName} ${this?.name?.middleName} ${this?.name?.lastName}`;
 });
 
 // Query Middleware/ Hook

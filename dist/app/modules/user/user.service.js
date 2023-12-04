@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const http_status_1 = __importDefault(require("http-status"));
 const config_1 = __importDefault(require("../../config"));
 const AppError_1 = __importDefault(require("../../errors/AppError"));
@@ -58,7 +59,7 @@ const createStudentIntoDB = (password, payload) => __awaiter(void 0, void 0, voi
     catch (err) {
         yield session.abortTransaction();
         yield session.endSession();
-        throw new Error('Failed to create student');
+        throw new Error(err);
     }
 });
 exports.UserService = {

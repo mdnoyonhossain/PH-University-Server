@@ -4,7 +4,8 @@ import httpStatus from 'http-status';
 import catchAsync from "../../utils/catchAsync";
 
 const getAllStudens = catchAsync(async (req, res) => {
-    const result = await StudentServices.getAllStudentFromDB();
+    const query = req.query;
+    const result = await StudentServices.getAllStudentFromDB(query);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,

@@ -4,14 +4,75 @@ import AppError from "../../errors/AppError";
 import httpStatus from "http-status";
 import { User } from "../user/user.model";
 import { TStudent } from "./student.interface";
+import QueryBuilder from "../../builder/QueryBuilder";
+import { studentSearchableField } from "./student.constant";
 
 
-const getAllStudentFromDB = async () => {
-    const result = await Student.find().populate('admissionSemester').populate({
+const getAllStudentFromDB = async (query: Record<string, unknown>) => {
+    // const queryObj = { ...query };
+
+    // const studentSearchAbleField = ['email', 'presentAddress', 'name.firstName'];
+    // let searchTerm = '';
+
+    // if (query?.searchTerm) {
+    //     searchTerm = query?.searchTerm as string;
+    // }
+
+    // const searchQuery = Student.find({
+    //     $or: studentSearchAbleField.map(field => ({
+    //         [field]: { $regex: searchTerm, $options: 'i' }
+    //     }))
+    // });
+
+    // const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
+    // excludeFields.forEach(el => delete queryObj[el]); // query filter
+
+    // const filterQuery = searchQuery.find(queryObj)
+    //     .populate('admissionSemester').populate({
+    //         path: 'academicDepartment',
+    //         populate: 'academicFaculty'
+    //     });
+
+    // let sort = '-createdAt';
+    // if (query?.sort) {
+    //     sort = query?.sort as string;
+    // }
+
+    // const sortQuery = filterQuery.sort(sort);
+
+    // let page = 1;
+    // let limit = 1;
+    // let skip = 0;
+
+    // if (query?.limit) {
+    //     limit = Number(query?.limit);
+    // }
+
+    // if (query.page) {
+    //     page = Number(query?.page);
+    //     skip = (page - 1) * limit
+    // }
+
+    // const paginateQuery = sortQuery.skip(skip);
+
+    // const limitQuery = paginateQuery.limit(limit);
+
+    // // fields limiting
+    // let fields = '-__v';
+    // if(query.fields){
+    //     fields = (query.fields as string).split(',').join(' ');
+    // }
+
+    // const fieldQuery = await limitQuery.select(fields);
+
+    // return fieldQuery;
+
+    const studentQuery = new QueryBuilder(Student.find().populate('admissionSemester').populate({
         path: 'academicDepartment',
         populate: 'academicFaculty'
-    });
+    }), query).search(studentSearchableField).filter().sort().paginate().fields();
 
+    const result = await studentQuery.modelQuery;
     return result;
 }
 
@@ -30,7 +91,7 @@ const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
     const modifiedUpdateData: Record<string, unknown> = {
         ...remainingStudentData
     };
-    
+
     if (name && Object.keys(name).length) {
         for (const [key, value] of Object.entries(name)) {
             modifiedUpdateData[`name.${key}`] = value;
@@ -49,9 +110,7 @@ const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
         }
     }
 
-    console.log(modifiedUpdateData);
-
-    const result = await Student.findOneAndUpdate({ id }, modifiedUpdateData, { new: true, runValidators: true});
+    const result = await Student.findOneAndUpdate({ id }, modifiedUpdateData, { new: true, runValidators: true });
     return result;
 }
 
