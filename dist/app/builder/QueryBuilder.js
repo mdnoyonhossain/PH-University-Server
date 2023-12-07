@@ -26,8 +26,8 @@ class QueryBuilder {
         return this;
     }
     sort() {
-        var _a;
-        const sort = ((_a = this === null || this === void 0 ? void 0 : this.query) === null || _a === void 0 ? void 0 : _a.sort).split(',').join(' ') || '-createdAt';
+        var _a, _b;
+        const sort = ((_b = (_a = this === null || this === void 0 ? void 0 : this.query) === null || _a === void 0 ? void 0 : _a.sort) === null || _b === void 0 ? void 0 : _b.split(',').join(' ')) || '-createdAt';
         this.modelQuery = this.modelQuery.sort(sort);
         return this;
     }

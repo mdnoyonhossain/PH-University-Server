@@ -78,6 +78,7 @@ const studenSchema = new mongoose_1.Schema({
     dateOfBirth: { type: Date },
     email: {
         type: String,
+        unique: true,
         required: true,
         validate: {
             validator: (value) => validator_1.default.isEmail(value),

@@ -82,7 +82,7 @@ const getAllStudentFromDB = (query) => __awaiter(void 0, void 0, void 0, functio
     return result;
 });
 const getSingleStudentFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield student_model_1.Student.findOne({ id: id }).populate('admissionSemester').populate({
+    const result = yield student_model_1.Student.findById(id).populate('admissionSemester').populate({
         path: 'academicDepartment',
         populate: 'academicFaculty'
     });
@@ -106,7 +106,7 @@ const updateStudentIntoDB = (id, payload) => __awaiter(void 0, void 0, void 0, f
             modifiedUpdateData[`localGuardian.${key}`] = value;
         }
     }
-    const result = yield student_model_1.Student.findOneAndUpdate({ id }, modifiedUpdateData, { new: true, runValidators: true });
+    const result = yield student_model_1.Student.findByIdAndUpdate(id, modifiedUpdateData, { new: true, runValidators: true });
     return result;
 });
 const deleteStudentFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
@@ -114,12 +114,14 @@ const deleteStudentFromDB = (id) => __awaiter(void 0, void 0, void 0, function* 
     try {
         session.startTransaction();
         // delete sutdent
-        const deletedStudent = yield student_model_1.Student.findOneAndUpdate({ id }, { isDeleted: true }, { new: true, session });
+        const deletedStudent = yield student_model_1.Student.findByIdAndUpdate(id, { isDeleted: true }, { new: true, session });
         if (!deletedStudent) {
             throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Failed to delete student');
         }
+        // get user _id from deletedStudent
+        const userId = deletedStudent.user;
         // delete user
-        const deletedUser = yield user_model_1.User.findOneAndUpdate({ id }, { isDeleted: true }, { new: true, session });
+        const deletedUser = yield user_model_1.User.findByIdAndUpdate(userId, { isDeleted: true }, { new: true, session });
         if (!deletedUser) {
             throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Failed to delete user');
         }

@@ -68,6 +68,7 @@ const studenSchema = new Schema<TStudent, TStudentModel>({
     dateOfBirth: { type: Date },
     email: {
         type: String,
+        unique: true,
         required: true,
         validate: {
             validator: (value: string) => validator.isEmail(value),
