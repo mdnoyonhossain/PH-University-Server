@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 import validator from 'validator';
-import { StudentModel, TGuardian, TLocalGuardian, TStudent, TUserName } from "./student.interface";
+import { TGuardian, TLocalGuardian, TStudent, TStudentModel, TUserName } from "./student.interface";
 
 const userNameSchema = new Schema<TUserName>({
     firstName: {
@@ -44,7 +44,7 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
     address: { type: String, required: true }
 })
 
-const studenSchema = new Schema<TStudent, StudentModel>({
+const studenSchema = new Schema<TStudent, TStudentModel>({
     id: {
         type: String,
         required: [true, 'ID is required'],
@@ -68,6 +68,7 @@ const studenSchema = new Schema<TStudent, StudentModel>({
     dateOfBirth: { type: Date },
     email: {
         type: String,
+        unique: true,
         required: true,
         validate: {
             validator: (value: string) => validator.isEmail(value),
@@ -86,6 +87,11 @@ const studenSchema = new Schema<TStudent, StudentModel>({
         ref: 'AcademicSemester',
     },
     profileImg: { type: String, required: true },
+    isDeleted: { type: Boolean, default: false },
+    academicDepartment: {
+        type: Schema.Types.ObjectId,
+        ref: 'AcademicDepartment',
+    }
 },
     {
         toJSON: {
@@ -97,7 +103,7 @@ const studenSchema = new Schema<TStudent, StudentModel>({
 
 // virtual
 studenSchema.virtual('fullName').get(function () {
-    return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
+    return `${this?.name?.firstName} ${this?.name?.middleName} ${this?.name?.lastName}`;
 });
 
 // Query Middleware/ Hook
@@ -122,4 +128,4 @@ studenSchema.statics.isExistsUser = async function (id: string) {
     return existingUser;
 }
 
-export const Student = model<TStudent, StudentModel>('Student', studenSchema);
+export const Student = model<TStudent, TStudentModel>('Student', studenSchema);

@@ -78,6 +78,7 @@ const studenSchema = new mongoose_1.Schema({
     dateOfBirth: { type: Date },
     email: {
         type: String,
+        unique: true,
         required: true,
         validate: {
             validator: (value) => validator_1.default.isEmail(value),
@@ -96,6 +97,11 @@ const studenSchema = new mongoose_1.Schema({
         ref: 'AcademicSemester',
     },
     profileImg: { type: String, required: true },
+    isDeleted: { type: Boolean, default: false },
+    academicDepartment: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: 'AcademicDepartment',
+    }
 }, {
     toJSON: {
         virtuals: true
@@ -103,7 +109,8 @@ const studenSchema = new mongoose_1.Schema({
 });
 // virtual
 studenSchema.virtual('fullName').get(function () {
-    return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
+    var _a, _b, _c;
+    return `${(_a = this === null || this === void 0 ? void 0 : this.name) === null || _a === void 0 ? void 0 : _a.firstName} ${(_b = this === null || this === void 0 ? void 0 : this.name) === null || _b === void 0 ? void 0 : _b.middleName} ${(_c = this === null || this === void 0 ? void 0 : this.name) === null || _c === void 0 ? void 0 : _c.lastName}`;
 });
 // Query Middleware/ Hook
 studenSchema.pre('find', function (next) {

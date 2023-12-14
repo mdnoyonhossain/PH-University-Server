@@ -8,10 +8,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AcademicSemester = void 0;
 const mongoose_1 = require("mongoose");
 const academicSemester_constant_1 = require("./academicSemester.constant");
+const AppError_1 = __importDefault(require("../../errors/AppError"));
+const http_status_1 = __importDefault(require("http-status"));
 const academicSemesterSchema = new mongoose_1.Schema({
     name: { type: String, enum: academicSemester_constant_1.AcademicSemesterName, required: true },
     code: { type: String, enum: academicSemester_constant_1.AcademicSemesterCode, required: true },
@@ -28,7 +33,17 @@ academicSemesterSchema.pre('save', function (next) {
             year: this.year
         });
         if (isSemesterExists) {
-            throw new Error('Semester is Already Exists');
+            throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Semester is Already Exists');
+        }
+        next();
+    });
+});
+academicSemesterSchema.pre('findOneAndUpdate', function (next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const query = this.getQuery();
+        const isSemesterExists = yield exports.AcademicSemester.findOne(query);
+        if (!isSemesterExists) {
+            throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'This Semester dose not Exists!');
         }
         next();
     });

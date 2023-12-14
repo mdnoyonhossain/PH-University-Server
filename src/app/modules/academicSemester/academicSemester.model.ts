@@ -1,6 +1,8 @@
 import { Schema, model } from "mongoose";
 import { TAcademicSemester } from "./academicSemester.interface";
 import { AcademicSemesterCode, AcademicSemesterName, Months } from "./academicSemester.constant";
+import AppError from "../../errors/AppError";
+import httpStatus from "http-status";
 
 const academicSemesterSchema = new Schema<TAcademicSemester>({
     name: { type: String, enum: AcademicSemesterName, required: true },
@@ -20,11 +22,22 @@ academicSemesterSchema.pre('save', async function (next) {
         year: this.year
     });
 
-    if(isSemesterExists){
-        throw new Error('Semester is Already Exists');
+    if (isSemesterExists) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Semester is Already Exists');
     }
 
     next();
+});
+
+academicSemesterSchema.pre('findOneAndUpdate', async function (next) {
+    const query = this.getQuery();
+    const isSemesterExists = await AcademicSemester.findOne(query);
+
+    if (!isSemesterExists) {
+        throw new AppError(httpStatus.NOT_FOUND, 'This Semester dose not Exists!');
+    }
+
+    next()
 })
 
 export const AcademicSemester = model<TAcademicSemester>('AcademicSemester', academicSemesterSchema)

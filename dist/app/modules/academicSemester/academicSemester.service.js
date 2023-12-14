@@ -8,14 +8,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AcademicSemesterServices = void 0;
+const http_status_1 = __importDefault(require("http-status"));
+const AppError_1 = __importDefault(require("../../errors/AppError"));
 const academicSemester_constant_1 = require("./academicSemester.constant");
 const academicSemester_model_1 = require("./academicSemester.model");
 const createAcademicSemesterIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     // semester name --> semester code
     if (academicSemester_constant_1.academicSemesterNameCodeMapper[payload.name] !== payload.code) {
-        throw new Error('Invalid Semester Code.');
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Invalid Semester Code.');
     }
     const result = yield academicSemester_model_1.AcademicSemester.create(payload);
     return result;
@@ -30,7 +35,7 @@ const getSingleAcademicSemesterFromDB = (semesterId) => __awaiter(void 0, void 0
 });
 const updateAcademicSemesterFromDB = (semesterId, payload) => __awaiter(void 0, void 0, void 0, function* () {
     if (payload.name && payload.code && academicSemester_constant_1.academicSemesterNameCodeMapper[payload.name] !== payload.code) {
-        throw new Error('Invalid Semester Code');
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Invalid Semester Code');
     }
     const result = yield academicSemester_model_1.AcademicSemester.findOneAndUpdate({ _id: semesterId }, payload, { new: true });
     return result;

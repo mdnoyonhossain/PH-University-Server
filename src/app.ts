@@ -12,7 +12,7 @@ app.use(cors());
 // application router
 app.use('/api/v1', router);
 
-app.get('/', (req: Request, res: Response) => {
+app.get('/', async (req: Request, res: Response) => {
     res.send('Backend Server is Running');
 });
 
