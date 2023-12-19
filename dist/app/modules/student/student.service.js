@@ -74,7 +74,7 @@ const getAllStudentFromDB = (query) => __awaiter(void 0, void 0, void 0, functio
     // }
     // const fieldQuery = await limitQuery.select(fields);
     // return fieldQuery;
-    const studentQuery = new QueryBuilder_1.default(student_model_1.Student.find().populate('admissionSemester').populate({
+    const studentQuery = new QueryBuilder_1.default(student_model_1.Student.find().populate('admissionSemester').populate('user').populate({
         path: 'academicDepartment',
         populate: 'academicFaculty'
     }), query).search(student_constant_1.studentSearchableField).filter().sort().paginate().fields();
