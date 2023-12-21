@@ -13,8 +13,9 @@ import { AcademicDepartment } from "../academicDepartment/academicDepartment.mod
 import { Faculty } from "../Faculty/faculty.model";
 import { TFaculty } from "../Faculty/faculty.interface";
 import { Admin } from "../Admin/admin.model";
+import { sendImageToCloudinary } from "../../utils/sendImageToCloudinary";
 
-const createStudentIntoDB = async (password: string, payload: TStudent) => {
+const createStudentIntoDB = async (file: any, password: string, payload: TStudent) => {
     // create a user object
     const userData: Partial<TUser> = {};
 
@@ -23,6 +24,8 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
 
     //set student role
     userData.role = 'student';
+    // set studnet email
+    userData.email = payload.email;
 
     // find academic semester info
     const admissionSemester = await AcademicSemester.findById(payload.admissionSemester);
@@ -39,6 +42,12 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
         //set manually generated it
         userData.id = await generateStudentId(admissionSemester);
 
+        // send image to cloudinary
+        const path = file?.path;
+        const imageName = `${userData?.id}${payload?.name?.firstName}`;
+        // send 
+        const { secure_url } = await sendImageToCloudinary(path, imageName) as { secure_url: string };
+
         // create a user (transaction-1)
         const newUser = await User.create([userData], { session }); // array
 
@@ -50,6 +59,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
         // set id , _id as user
         payload.id = newUser[0].id;
         payload.user = newUser[0]._id; //reference _id
+        payload.profileImg = secure_url;
 
         const newStudent = await Student.create([payload], { session }); // (transaction-2)
         if (!newStudent) {
@@ -76,6 +86,8 @@ const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
 
     //set student role
     userData.role = 'faculty';
+    // set faculty email
+    userData.email = payload.email;
 
     // find academic department info
     const academicDepartment = await AcademicDepartment.findById(
@@ -132,6 +144,8 @@ const createAdminIntoDB = async (password: string, payload: TFaculty) => {
 
     //set student role
     userData.role = 'admin';
+    // set admin email
+    userData.email = payload.email;
 
     const session = await mongoose.startSession();
 
@@ -169,8 +183,31 @@ const createAdminIntoDB = async (password: string, payload: TFaculty) => {
     }
 };
 
+const getMe = async (userId: string, role: string) => {
+    let result = null;
+
+    if (role === 'admin') {
+        result = await Admin.findOne({ id: userId }).populate('user');
+    }
+    if (role === 'student') {
+        result = await Student.findOne({ id: userId }).populate('user');
+    }
+    if (role === 'faculty') {
+        result = await Faculty.findOne({ id: userId }).populate('user');
+    }
+
+    return result;
+}
+
+const changeStatus = async (id: string, payload: { status: string }) => {
+    const result = await User.findByIdAndUpdate(id, payload, { new: true });
+    return result;
+}
+
 export const UserService = {
     createStudentIntoDB,
     createFacultyIntoDB,
-    createAdminIntoDB
+    createAdminIntoDB,
+    getMe,
+    changeStatus
 }

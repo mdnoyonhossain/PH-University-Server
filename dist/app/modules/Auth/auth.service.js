@@ -20,6 +20,7 @@ const config_1 = __importDefault(require("../../config"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const auth_utils_1 = require("./auth.utils");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const sendEmail_1 = require("../../utils/sendEmail");
 const loginUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     // checking if the user is exists
     const user = yield user_model_1.User.isUserExistsByCustomId(payload === null || payload === void 0 ? void 0 : payload.id);
@@ -84,7 +85,7 @@ const changePassword = (userData, payload) => __awaiter(void 0, void 0, void 0, 
 });
 const refreshToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
     // check if the veryfi token is valid
-    const decoded = jsonwebtoken_1.default.verify(token, config_1.default.jwt_refresh_secret);
+    const decoded = (0, auth_utils_1.verifyToken)(token, config_1.default.jwt_refresh_secret);
     const { userId, iat } = decoded;
     // checking if the user is exists
     const user = yield user_model_1.User.isUserExistsByCustomId(userId);
@@ -111,8 +112,62 @@ const refreshToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
         accessToken
     };
 });
+const forgetPassword = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    // checking if the user is exists
+    const user = yield user_model_1.User.isUserExistsByCustomId(userId);
+    if (!user) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'This User is Not Found!');
+    }
+    // checking if the user is already Deleted
+    if (user === null || user === void 0 ? void 0 : user.isDeleted) {
+        throw new AppError_1.default(http_status_1.default.FORBIDDEN, 'This User is Deleted!');
+    }
+    // checking if the user is blocked
+    if ((user === null || user === void 0 ? void 0 : user.status) === 'blocked') {
+        throw new AppError_1.default(http_status_1.default.FORBIDDEN, 'This User is Blocked!');
+    }
+    // access token
+    const jwtPayload = {
+        userId: user.id,
+        role: user.role
+    };
+    const resetToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_access_secret, '10m');
+    const resetUiLink = `${config_1.default.reset_password_ui_link}?id=${user === null || user === void 0 ? void 0 : user.id}&token=${resetToken}`;
+    (0, sendEmail_1.sendEmail)(user.email, resetUiLink);
+});
+const resetPassword = (payload, token) => __awaiter(void 0, void 0, void 0, function* () {
+    // checking if the user is exists
+    const user = yield user_model_1.User.isUserExistsByCustomId(payload.id);
+    if (!user) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'This User is Not Found!');
+    }
+    // checking if the user is already Deleted
+    if (user === null || user === void 0 ? void 0 : user.isDeleted) {
+        throw new AppError_1.default(http_status_1.default.FORBIDDEN, 'This User is Deleted!');
+    }
+    // checking if the user is blocked
+    if ((user === null || user === void 0 ? void 0 : user.status) === 'blocked') {
+        throw new AppError_1.default(http_status_1.default.FORBIDDEN, 'This User is Blocked!');
+    }
+    // veryfi access token
+    const decoded = jsonwebtoken_1.default.verify(token, config_1.default.jwt_access_secret);
+    if (payload.id !== decoded.userId) {
+        throw new AppError_1.default(http_status_1.default.FORBIDDEN, 'You are Forbidden!');
+    }
+    const newHashedPassword = yield bcrypt_1.default.hash(payload.newPassword, Number(config_1.default.bcrypt_salt_rounds));
+    yield user_model_1.User.findOneAndUpdate({
+        id: decoded.userId,
+        role: decoded.role
+    }, {
+        password: newHashedPassword,
+        needsPasswordChange: false,
+        passwordChangedAt: new Date()
+    });
+});
 exports.AuthServices = {
     loginUser,
     changePassword,
-    refreshToken
+    refreshToken,
+    forgetPassword,
+    resetPassword
 };
