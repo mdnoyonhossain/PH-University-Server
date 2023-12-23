@@ -22,6 +22,7 @@ const academicDepartment_model_1 = require("../academicDepartment/academicDepart
 const course_model_1 = require("../Course/course.model");
 const faculty_model_1 = require("../Faculty/faculty.model");
 const OfferedCourse_utils_1 = require("./OfferedCourse.utils");
+const QueryBuilder_1 = __importDefault(require("../../builder/QueryBuilder"));
 const createOfferedCourseIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const { semesterRegistration, academicFaculty, academicDepartment, course, faculty, section, days, startTime, endTime } = payload;
     // check if the semester registred id is exists!
@@ -44,7 +45,7 @@ const createOfferedCourseIntoDB = (payload) => __awaiter(void 0, void 0, void 0,
     // check if the Course id is exists!
     const isCourseExists = yield course_model_1.Course.findById(course);
     if (!isCourseExists) {
-        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Academic Department Not Found !');
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Course Not Found !');
     }
     // check if the faculty id is exists!
     const isFacultyExists = yield faculty_model_1.Faculty.findById(faculty);
@@ -72,6 +73,22 @@ const createOfferedCourseIntoDB = (payload) => __awaiter(void 0, void 0, void 0,
     }
     const result = yield OfferedCourse_model_1.OfferedCourse.create(Object.assign(Object.assign({}, payload), { academicSemester }));
     return result;
+});
+const getAllOfferedCoursesFromDB = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const offeredCourseQuery = new QueryBuilder_1.default(OfferedCourse_model_1.OfferedCourse.find(), query)
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
+    const result = yield offeredCourseQuery.modelQuery;
+    return result;
+});
+const getSingleOfferedCourseFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const offeredCourse = yield OfferedCourse_model_1.OfferedCourse.findById(id);
+    if (!offeredCourse) {
+        throw new AppError_1.default(404, 'Offered Course not found');
+    }
+    return offeredCourse;
 });
 const updateOfferedCourseIntoDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
     const { faculty, days, startTime, endTime } = payload;
@@ -104,7 +121,28 @@ const updateOfferedCourseIntoDB = (id, payload) => __awaiter(void 0, void 0, voi
     const result = yield OfferedCourse_model_1.OfferedCourse.findByIdAndUpdate(id, payload, { new: true, runValidators: true });
     return result;
 });
+const deleteOfferedCourseFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    /**
+     * Step 1: check if the offered course exists
+     * Step 2: check if the semester registration status is upcoming
+     * Step 3: delete the offered course
+     */
+    const isOfferedCourseExists = yield OfferedCourse_model_1.OfferedCourse.findById(id);
+    if (!isOfferedCourseExists) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Offered Course not found');
+    }
+    const semesterRegistation = isOfferedCourseExists.semesterRegistration;
+    const semesterRegistrationStatus = yield semesterRegistration_model_1.SemesterRegistration.findById(semesterRegistation).select('status');
+    if ((semesterRegistrationStatus === null || semesterRegistrationStatus === void 0 ? void 0 : semesterRegistrationStatus.status) !== 'UPCOMING') {
+        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, `Offered course can not update ! because the semester ${semesterRegistrationStatus}`);
+    }
+    const result = yield OfferedCourse_model_1.OfferedCourse.findByIdAndDelete(id);
+    return result;
+});
 exports.OfferedCourseServices = {
     createOfferedCourseIntoDB,
-    updateOfferedCourseIntoDB
+    getAllOfferedCoursesFromDB,
+    getSingleOfferedCourseFromDB,
+    deleteOfferedCourseFromDB,
+    updateOfferedCourseIntoDB,
 };

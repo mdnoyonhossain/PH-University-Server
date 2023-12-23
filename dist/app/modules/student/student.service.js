@@ -79,7 +79,11 @@ const getAllStudentFromDB = (query) => __awaiter(void 0, void 0, void 0, functio
         populate: 'academicFaculty'
     }), query).search(student_constant_1.studentSearchableField).filter().sort().paginate().fields();
     const result = yield studentQuery.modelQuery;
-    return result;
+    const meta = yield studentQuery.countTotal();
+    return {
+        meta,
+        result
+    };
 });
 const getSingleStudentFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield student_model_1.Student.findById(id).populate('admissionSemester').populate({

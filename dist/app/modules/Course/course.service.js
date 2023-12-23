@@ -36,8 +36,12 @@ const createCourseIntoDB = (payload) => __awaiter(void 0, void 0, void 0, functi
 });
 const getAllCourseFromDB = (query) => __awaiter(void 0, void 0, void 0, function* () {
     const courseQuery = new QueryBuilder_1.default(course_model_1.Course.find().populate('preRequisiteCourse.course'), query).search(course_constant_1.CourseSearchableFields).filter().sort().paginate().fields();
+    const meta = yield courseQuery.countTotal();
     const result = yield courseQuery.modelQuery;
-    return result;
+    return {
+        meta,
+        result
+    };
 });
 const getSingleCourseFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield course_model_1.Course.findById(id).populate('preRequisiteCourse.course');
