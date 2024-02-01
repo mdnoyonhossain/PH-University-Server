@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Faculty = void 0;
 const mongoose_1 = require("mongoose");
 const faculty_constant_1 = require("./faculty.constant");
-const facultyNameSchema = new mongoose_1.Schema({
+const userNameSchema = new mongoose_1.Schema({
     firstName: {
         type: String,
         required: [true, 'First Name is required'],
@@ -47,7 +47,7 @@ const facultySchema = new mongoose_1.Schema({
         required: [true, 'Designation is required'],
     },
     name: {
-        type: facultyNameSchema,
+        type: userNameSchema,
         required: [true, 'Name is required'],
     },
     gender: {
@@ -69,7 +69,7 @@ const facultySchema = new mongoose_1.Schema({
         type: String,
         required: [true, 'Emergency contact number is required'],
     },
-    bloodGroup: {
+    bloogGroup: {
         type: String,
         enum: {
             values: faculty_constant_1.BloodGroup,
@@ -84,11 +84,16 @@ const facultySchema = new mongoose_1.Schema({
         type: String,
         required: [true, 'Permanent address is required'],
     },
-    profileImg: { type: String },
+    profileImg: { type: String, default: '' },
     academicDepartment: {
         type: mongoose_1.Schema.Types.ObjectId,
-        required: [true, 'User id is required'],
-        ref: 'User',
+        required: [true, 'Acadcemic Department is required'],
+        ref: 'AcademicDepartment',
+    },
+    academicFaculty: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        required: [true, 'Acadcemic Faculty is required'],
+        ref: 'AcademicFaculty',
     },
     isDeleted: {
         type: Boolean,
@@ -102,7 +107,11 @@ const facultySchema = new mongoose_1.Schema({
 // generating full name
 facultySchema.virtual('fullName').get(function () {
     var _a, _b, _c;
-    return (((_a = this === null || this === void 0 ? void 0 : this.name) === null || _a === void 0 ? void 0 : _a.firstName) + '' + ((_b = this === null || this === void 0 ? void 0 : this.name) === null || _b === void 0 ? void 0 : _b.middleName) + '' + ((_c = this === null || this === void 0 ? void 0 : this.name) === null || _c === void 0 ? void 0 : _c.lastName));
+    return (((_a = this === null || this === void 0 ? void 0 : this.name) === null || _a === void 0 ? void 0 : _a.firstName) +
+        '' +
+        ((_b = this === null || this === void 0 ? void 0 : this.name) === null || _b === void 0 ? void 0 : _b.middleName) +
+        '' +
+        ((_c = this === null || this === void 0 ? void 0 : this.name) === null || _c === void 0 ? void 0 : _c.lastName));
 });
 // filter out deleted documents
 facultySchema.pre('find', function (next) {

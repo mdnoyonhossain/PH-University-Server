@@ -17,17 +17,6 @@ const http_status_1 = __importDefault(require("http-status"));
 const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const faculty_service_1 = require("./faculty.service");
-const getAllFaculty = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(req.cookies);
-    const query = req.query;
-    const result = yield faculty_service_1.FacultyServices.getAllFacultyFromDB(query);
-    (0, sendResponse_1.default)(res, {
-        statusCode: http_status_1.default.OK,
-        success: true,
-        message: 'Faculties are retrieved succesfully',
-        data: result
-    });
-}));
 const getSingleFaculty = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const result = yield faculty_service_1.FacultyServices.getSingleFacultyFromDB(id);
@@ -38,18 +27,28 @@ const getSingleFaculty = (0, catchAsync_1.default)((req, res) => __awaiter(void 
         data: result,
     });
 }));
+const getAllFaculties = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield faculty_service_1.FacultyServices.getAllFacultiesFromDB(req.query);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Faculties are retrieved succesfully',
+        meta: result.meta,
+        data: result.result,
+    });
+}));
 const updateFaculty = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const faculty = req.body;
+    const { faculty } = req.body;
     const result = yield faculty_service_1.FacultyServices.updateFacultyIntoDB(id, faculty);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
         message: 'Faculty is updated succesfully',
-        data: result
+        data: result,
     });
 }));
-const deletedFaculty = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteFaculty = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const result = yield faculty_service_1.FacultyServices.deleteFacultyFromDB(id);
     (0, sendResponse_1.default)(res, {
@@ -60,8 +59,8 @@ const deletedFaculty = (0, catchAsync_1.default)((req, res) => __awaiter(void 0,
     });
 }));
 exports.FacultyControllers = {
-    getAllFaculty,
+    getAllFaculties,
     getSingleFaculty,
+    deleteFaculty,
     updateFaculty,
-    deletedFaculty
 };

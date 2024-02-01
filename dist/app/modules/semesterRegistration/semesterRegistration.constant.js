@@ -5,5 +5,5 @@ exports.SemesterRegistrationStatus = ['UPCOMING', 'ONGOING', 'ENDED'];
 exports.RegistrationStatus = {
     UPCOMING: 'UPCOMING',
     ONGOING: 'ONGOING',
-    ENDED: 'ENDED'
+    ENDED: 'ENDED',
 };

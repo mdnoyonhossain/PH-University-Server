@@ -1,27 +1,32 @@
-import express, { Application, Request, Response } from 'express';
-import cors from 'cors';
+/* eslint-disable no-undef */
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import cookieParser from 'cookie-parser';
-import globalErrorHander from './app/middlewares/globalErrorHandler';
-import router from './app/routes';
+import cors from 'cors';
+import express, { Application, Request, Response } from 'express';
+import globalErrorHandler from './app/middlewares/globalErrorhandler';
 import notFound from './app/middlewares/notFound';
+import router from './app/routes';
+
 const app: Application = express();
 
-// Parsers
+//parsers
 app.use(express.json());
-app.use(cors({ origin: ['http://localhost:5173'] }));
 app.use(cookieParser());
 
-// application router
+app.use(cors({ origin: ['http://localhost:5173'], credentials: true }));
+
+// application routes
 app.use('/api/v1', router);
 
-app.get('/', async (req: Request, res: Response) => {
-    res.send('Backend Server is Running');
+app.get('/', (req: Request, res: Response) => {
+  res.send('Hi Next Level Developer !');
 });
 
-// Global Error Handler
-app.use(globalErrorHander);
+app.use(globalErrorHandler);
 
-// Not Found
+//Not Found
 app.use(notFound);
 
 export default app;

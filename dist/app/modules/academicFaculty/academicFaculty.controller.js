@@ -18,22 +18,22 @@ const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const academicFaculty_service_1 = require("./academicFaculty.service");
 const createAcademicFaculty = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const academicFaculty = req.body;
-    const result = yield academicFaculty_service_1.AcademicFacultyServices.createAcademicFacultyIntoDB(academicFaculty);
+    const result = yield academicFaculty_service_1.AcademicFacultyServices.createAcademicFacultyIntoDB(req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Academic Faculty is Created Successfully',
-        data: result
+        message: 'Academic faculty is created succesfully',
+        data: result,
     });
 }));
-const getAllAcademicFaculty = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield academicFaculty_service_1.AcademicFacultyServices.getAllAcademicFacultyFromDB();
+const getAllAcademicFaculties = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield academicFaculty_service_1.AcademicFacultyServices.getAllAcademicFacultiesFromDB(req.query);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Academic Faculty are retrieved Successfully',
-        data: result
+        message: 'Academic faculties are retrieved successfully',
+        meta: result.meta,
+        data: result.result,
     });
 }));
 const getSingleAcademicFaculty = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -42,24 +42,23 @@ const getSingleAcademicFaculty = (0, catchAsync_1.default)((req, res) => __await
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Academic Faculty are retrieved Successfully',
-        data: result
+        message: 'Academic faculty is retrieved succesfully',
+        data: result,
     });
 }));
 const updateAcademicFaculty = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { facultyId } = req.params;
-    const faculty = req.body;
-    const result = yield academicFaculty_service_1.AcademicFacultyServices.updateAcademicFacultyIntoDB(facultyId, faculty);
+    const result = yield academicFaculty_service_1.AcademicFacultyServices.updateAcademicFacultyIntoDB(facultyId, req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Academic Faculty is Updated Successfully',
-        data: result
+        message: 'Academic faculty is updated succesfully',
+        data: result,
     });
 }));
 exports.AcademicFacultyControllers = {
     createAcademicFaculty,
-    getAllAcademicFaculty,
+    getAllAcademicFaculties,
     getSingleAcademicFaculty,
-    updateAcademicFaculty
+    updateAcademicFaculty,
 };

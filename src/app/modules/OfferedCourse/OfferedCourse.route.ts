@@ -1,18 +1,53 @@
 import express from 'express';
-import { OfferedCourseControllers } from './OfferedCourse.controller';
+import auth from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
+import { USER_ROLE } from '../User/user.constant';
+import { OfferedCourseControllers } from './OfferedCourse.controller';
 import { OfferedCourseValidations } from './OfferedCourse.validation';
 
 const router = express.Router();
 
-router.get('/', OfferedCourseControllers.getAllOfferedCourses);
+router.get(
+  '/',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.faculty),
+  OfferedCourseControllers.getAllOfferedCourses,
+);
 
-router.get('/:id', OfferedCourseControllers.getSingleOfferedCourses);
+router.get(
+  '/my-offered-courses',
+  auth(USER_ROLE.student),
+  OfferedCourseControllers.getMyOfferedCourses,
+);
 
-router.post('/create-offered-course', validateRequest(OfferedCourseValidations.createOfferedCourseValidationSchema), OfferedCourseControllers.createOfferedCourse);
+router.get(
+  '/:id',
+  auth(
+    USER_ROLE.superAdmin,
+    USER_ROLE.admin,
+    USER_ROLE.faculty,
+    USER_ROLE.student,
+  ),
+  OfferedCourseControllers.getSingleOfferedCourses,
+);
 
-router.patch('/:id', validateRequest(OfferedCourseValidations.updateOfferedCourseValidationSchema), OfferedCourseControllers.updateOfferedCourse);
+router.post(
+  '/create-offered-course',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
+  validateRequest(OfferedCourseValidations.createOfferedCourseValidationSchema),
+  OfferedCourseControllers.createOfferedCourse,
+);
 
-router.delete('/:id', OfferedCourseControllers.deleteOfferedCourseFromDB);
+router.patch(
+  '/:id',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
+  validateRequest(OfferedCourseValidations.updateOfferedCourseValidationSchema),
+  OfferedCourseControllers.updateOfferedCourse,
+);
 
-export const OfferedCourseRoutes = router;
+router.delete(
+  '/:id',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
+  OfferedCourseControllers.deleteOfferedCourseFromDB,
+);
+
+export const offeredCourseRoutes = router;

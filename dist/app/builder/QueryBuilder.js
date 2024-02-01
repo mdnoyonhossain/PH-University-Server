@@ -19,24 +19,24 @@ class QueryBuilder {
         const searchTerm = (_a = this === null || this === void 0 ? void 0 : this.query) === null || _a === void 0 ? void 0 : _a.searchTerm;
         if (searchTerm) {
             this.modelQuery = this.modelQuery.find({
-                $or: searchableFields.map(field => ({
-                    [field]: { $regex: searchTerm, $options: 'i' }
-                }))
+                $or: searchableFields.map((field) => ({
+                    [field]: { $regex: searchTerm, $options: 'i' },
+                })),
             });
         }
         return this;
     }
     filter() {
-        const queryObj = Object.assign({}, this.query);
+        const queryObj = Object.assign({}, this.query); // copy
         // Filtering
         const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
-        excludeFields.forEach(element => delete queryObj[element]);
+        excludeFields.forEach((el) => delete queryObj[el]);
         this.modelQuery = this.modelQuery.find(queryObj);
         return this;
     }
     sort() {
-        var _a, _b;
-        const sort = ((_b = (_a = this === null || this === void 0 ? void 0 : this.query) === null || _a === void 0 ? void 0 : _a.sort) === null || _b === void 0 ? void 0 : _b.split(',').join(' ')) || '-createdAt';
+        var _a, _b, _c;
+        const sort = ((_c = (_b = (_a = this === null || this === void 0 ? void 0 : this.query) === null || _a === void 0 ? void 0 : _a.sort) === null || _b === void 0 ? void 0 : _b.split(',')) === null || _c === void 0 ? void 0 : _c.join(' ')) || '-createdAt';
         this.modelQuery = this.modelQuery.sort(sort);
         return this;
     }
@@ -49,8 +49,8 @@ class QueryBuilder {
         return this;
     }
     fields() {
-        var _a, _b;
-        const fields = ((_b = (_a = this === null || this === void 0 ? void 0 : this.query) === null || _a === void 0 ? void 0 : _a.fields) === null || _b === void 0 ? void 0 : _b.split(',').join(' ')) || '-__v';
+        var _a, _b, _c;
+        const fields = ((_c = (_b = (_a = this === null || this === void 0 ? void 0 : this.query) === null || _a === void 0 ? void 0 : _a.fields) === null || _b === void 0 ? void 0 : _b.split(',')) === null || _c === void 0 ? void 0 : _c.join(' ')) || '-__v';
         this.modelQuery = this.modelQuery.select(fields);
         return this;
     }
@@ -66,7 +66,7 @@ class QueryBuilder {
                 page,
                 limit,
                 total,
-                totalPage
+                totalPage,
             };
         });
     }

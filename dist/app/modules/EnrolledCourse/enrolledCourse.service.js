@@ -15,79 +15,89 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.EnrolledCourseServices = void 0;
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const http_status_1 = __importDefault(require("http-status"));
-const AppError_1 = __importDefault(require("../../errors/AppError"));
-const OfferedCourse_model_1 = require("../OfferedCourse/OfferedCourse.model");
-const enrolledCourse_model_1 = require("./enrolledCourse.model");
-const student_model_1 = require("../student/student.model");
 const mongoose_1 = __importDefault(require("mongoose"));
-const semesterRegistration_model_1 = require("../semesterRegistration/semesterRegistration.model");
+const QueryBuilder_1 = __importDefault(require("../../builder/QueryBuilder"));
+const AppError_1 = __importDefault(require("../../errors/AppError"));
 const course_model_1 = require("../Course/course.model");
 const faculty_model_1 = require("../Faculty/faculty.model");
+const OfferedCourse_model_1 = require("../OfferedCourse/OfferedCourse.model");
+const semesterRegistration_model_1 = require("../SemesterRegistration/semesterRegistration.model");
+const student_model_1 = require("../Student/student.model");
+const enrolledCourse_model_1 = __importDefault(require("./enrolledCourse.model"));
 const enrolledCourse_utils_1 = require("./enrolledCourse.utils");
 const createEnrolledCourseIntoDB = (userId, payload) => __awaiter(void 0, void 0, void 0, function* () {
     /**
-     * Steep1: check if the offered course is exists
-     * Steep2: Check if the strudent is alredy existes
-     * Steep3: Create an enrolled courses
+     * Step1: Check if the offered cousres is exists
+     * Step2: Check if the student is already enrolled
+     * Step3: Check if the max credits exceed
+     * Step4: Create an enrolled course
      */
     const { offeredCourse } = payload;
     const isOfferedCourseExists = yield OfferedCourse_model_1.OfferedCourse.findById(offeredCourse);
     if (!isOfferedCourseExists) {
-        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Offered Course Not Found!');
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Offered course not found !');
     }
-    const course = yield course_model_1.Course.findById(isOfferedCourseExists.course);
     if (isOfferedCourseExists.maxCapacity <= 0) {
-        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Room is Full!');
+        throw new AppError_1.default(http_status_1.default.BAD_GATEWAY, 'Room is full !');
     }
     const student = yield student_model_1.Student.findOne({ id: userId }, { _id: 1 });
     if (!student) {
-        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Student Not Found!');
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Student not found !');
     }
-    const isStudentAlreadyExists = yield enrolledCourse_model_1.EnrolledCourse.findOne({
-        semesterRegistration: isOfferedCourseExists.semesterRegistration,
+    const isStudentAlreadyEnrolled = yield enrolledCourse_model_1.default.findOne({
+        semesterRegistration: isOfferedCourseExists === null || isOfferedCourseExists === void 0 ? void 0 : isOfferedCourseExists.semesterRegistration,
         offeredCourse,
-        student: student._id
+        student: student._id,
     });
-    if (isStudentAlreadyExists) {
-        throw new AppError_1.default(http_status_1.default.CONFLICT, 'Student is Already Enrolled!');
+    if (isStudentAlreadyEnrolled) {
+        throw new AppError_1.default(http_status_1.default.CONFLICT, 'Student is already enrolled !');
     }
     // check total credits exceeds maxCredit
+    const course = yield course_model_1.Course.findById(isOfferedCourseExists.course);
+    const currentCredit = course === null || course === void 0 ? void 0 : course.credits;
     const semesterRegistration = yield semesterRegistration_model_1.SemesterRegistration.findById(isOfferedCourseExists.semesterRegistration).select('maxCredit');
     const maxCredit = semesterRegistration === null || semesterRegistration === void 0 ? void 0 : semesterRegistration.maxCredit;
-    const enrolledCourse = yield enrolledCourse_model_1.EnrolledCourse.aggregate([
-        // Stage1:
-        { $match: { semesterRegistration: isOfferedCourseExists.semesterRegistration, student: student._id } },
-        // Stage2:
+    const enrolledCourses = yield enrolledCourse_model_1.default.aggregate([
+        {
+            $match: {
+                semesterRegistration: isOfferedCourseExists.semesterRegistration,
+                student: student._id,
+            },
+        },
         {
             $lookup: {
                 from: 'courses',
                 localField: 'course',
                 foreignField: '_id',
-                as: 'enrolledCourseData'
-            }
+                as: 'enrolledCourseData',
+            },
         },
-        // Stage3:
         {
-            $unwind: '$enrolledCourseData'
+            $unwind: '$enrolledCourseData',
         },
-        // Stage4:
         {
-            $group: { _id: null, totalEnrolledCredits: { $sum: '$enrolledCourseData.credits' } }
+            $group: {
+                _id: null,
+                totalEnrolledCredits: { $sum: '$enrolledCourseData.credits' },
+            },
         },
-        // Stage5:
         {
-            $project: { _id: 0, totalEnrolledCredits: 1 }
-        }
+            $project: {
+                _id: 0,
+                totalEnrolledCredits: 1,
+            },
+        },
     ]);
-    // total enrolled credits + new enrolled credites credit > maxcredit
-    const totalCredits = enrolledCourse.length > 0 ? enrolledCourse[0].totalEnrolledCredits : 0;
-    if (totalCredits && maxCredit && totalCredits + (course === null || course === void 0 ? void 0 : course.credits) > maxCredit) {
-        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'You have exceeded Maximum Number of Credits!');
+    //  total enrolled credits + new enrolled course credit > maxCredit
+    const totalCredits = enrolledCourses.length > 0 ? enrolledCourses[0].totalEnrolledCredits : 0;
+    if (totalCredits && maxCredit && totalCredits + currentCredit > maxCredit) {
+        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'You have exceeded maximum number of credits !');
     }
     const session = yield mongoose_1.default.startSession();
     try {
         session.startTransaction();
-        const result = yield enrolledCourse_model_1.EnrolledCourse.create([{
+        const result = yield enrolledCourse_model_1.default.create([
+            {
                 semesterRegistration: isOfferedCourseExists.semesterRegistration,
                 academicSemester: isOfferedCourseExists.academicSemester,
                 academicFaculty: isOfferedCourseExists.academicFaculty,
@@ -96,13 +106,16 @@ const createEnrolledCourseIntoDB = (userId, payload) => __awaiter(void 0, void 0
                 course: isOfferedCourseExists.course,
                 student: student._id,
                 faculty: isOfferedCourseExists.faculty,
-                isEnrolled: true
-            }], { session });
+                isEnrolled: true,
+            },
+        ], { session });
         if (!result) {
-            throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Failed to enroll in this Course!');
+            throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Failed to enroll in this cousre !');
         }
         const maxCapacity = isOfferedCourseExists.maxCapacity;
-        yield OfferedCourse_model_1.OfferedCourse.findByIdAndUpdate(offeredCourse, { maxCapacity: maxCapacity - 1 });
+        yield OfferedCourse_model_1.OfferedCourse.findByIdAndUpdate(offeredCourse, {
+            maxCapacity: maxCapacity - 1,
+        });
         yield session.commitTransaction();
         yield session.endSession();
         return result;
@@ -112,6 +125,23 @@ const createEnrolledCourseIntoDB = (userId, payload) => __awaiter(void 0, void 0
         yield session.endSession();
         throw new Error(err);
     }
+});
+const getMyEnrolledCoursesFromDB = (studentId, query) => __awaiter(void 0, void 0, void 0, function* () {
+    const student = yield student_model_1.Student.findOne({ id: studentId });
+    if (!student) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Student not found !');
+    }
+    const enrolledCourseQuery = new QueryBuilder_1.default(enrolledCourse_model_1.default.find({ student: student._id }).populate('semesterRegistration academicSemester academicFaculty academicDepartment offeredCourse course student faculty'), query)
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
+    const result = yield enrolledCourseQuery.modelQuery;
+    const meta = yield enrolledCourseQuery.countTotal();
+    return {
+        meta,
+        result,
+    };
 });
 const updateEnrolledCourseMarksIntoDB = (facultyId, payload) => __awaiter(void 0, void 0, void 0, function* () {
     const { semesterRegistration, offeredCourse, student, courseMarks } = payload;
@@ -131,7 +161,7 @@ const updateEnrolledCourseMarksIntoDB = (facultyId, payload) => __awaiter(void 0
     if (!faculty) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Faculty not found !');
     }
-    const isCourseBelongToFaculty = yield enrolledCourse_model_1.EnrolledCourse.findOne({
+    const isCourseBelongToFaculty = yield enrolledCourse_model_1.default.findOne({
         semesterRegistration,
         offeredCourse,
         student,
@@ -142,9 +172,12 @@ const updateEnrolledCourseMarksIntoDB = (facultyId, payload) => __awaiter(void 0
     }
     const modifiedData = Object.assign({}, courseMarks);
     if (courseMarks === null || courseMarks === void 0 ? void 0 : courseMarks.finalTerm) {
-        const { classTest1, midTerm, classTest2, finalTerm } = isCourseBelongToFaculty.courseMarks;
-        const totalMarks = Math.ceil(classTest1 * 0.1) + Math.ceil(midTerm * 0.3) + Math.ceil(classTest2 * 0.1) + Math.ceil(finalTerm * 0.5);
-        const result = (0, enrolledCourse_utils_1.calculateGradenAndPoints)(totalMarks);
+        const { classTest1, classTest2, midTerm, finalTerm } = isCourseBelongToFaculty.courseMarks;
+        const totalMarks = Math.ceil(classTest1) +
+            Math.ceil(midTerm) +
+            Math.ceil(classTest2) +
+            Math.ceil(finalTerm);
+        const result = (0, enrolledCourse_utils_1.calculateGradeAndPoints)(totalMarks);
         modifiedData.grade = result.grade;
         modifiedData.gradePoints = result.gradePoints;
         modifiedData.isCompleted = true;
@@ -154,12 +187,13 @@ const updateEnrolledCourseMarksIntoDB = (facultyId, payload) => __awaiter(void 0
             modifiedData[`courseMarks.${key}`] = value;
         }
     }
-    const result = yield enrolledCourse_model_1.EnrolledCourse.findByIdAndUpdate(isCourseBelongToFaculty._id, modifiedData, {
+    const result = yield enrolledCourse_model_1.default.findByIdAndUpdate(isCourseBelongToFaculty._id, modifiedData, {
         new: true,
     });
     return result;
 });
 exports.EnrolledCourseServices = {
     createEnrolledCourseIntoDB,
-    updateEnrolledCourseMarksIntoDB
+    getMyEnrolledCoursesFromDB,
+    updateEnrolledCourseMarksIntoDB,
 };

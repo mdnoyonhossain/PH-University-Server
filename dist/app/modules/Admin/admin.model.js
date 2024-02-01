@@ -69,7 +69,7 @@ const adminSchema = new mongoose_1.Schema({
         type: String,
         required: [true, 'Emergency contact number is required'],
     },
-    bloodGroup: {
+    bloogGroup: {
         type: String,
         enum: {
             values: admin_constant_1.BloodGroup,
@@ -84,7 +84,7 @@ const adminSchema = new mongoose_1.Schema({
         type: String,
         required: [true, 'Permanent address is required'],
     },
-    profileImg: { type: String },
+    profileImg: { type: String, default: '' },
     isDeleted: {
         type: Boolean,
         default: false,

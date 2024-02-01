@@ -20,7 +20,7 @@ const createOfferedCourseValidationSchema = zod_1.z.object({
         section: zod_1.z.number(),
         maxCapacity: zod_1.z.number(),
         days: zod_1.z.array(zod_1.z.enum([...OfferedCourse_constant_1.Days])),
-        startTime: timeStringSchema, // HH: MM   00-23: 00-59
+        startTime: timeStringSchema,
         endTime: timeStringSchema,
     })
         .refine((body) => {
@@ -39,7 +39,7 @@ const updateOfferedCourseValidationSchema = zod_1.z.object({
         faculty: zod_1.z.string(),
         maxCapacity: zod_1.z.number(),
         days: zod_1.z.array(zod_1.z.enum([...OfferedCourse_constant_1.Days])),
-        startTime: timeStringSchema, // HH: MM   00-23: 00-59
+        startTime: timeStringSchema,
         endTime: timeStringSchema,
     })
         .refine((body) => {

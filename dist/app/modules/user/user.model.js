@@ -13,39 +13,67 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
-const mongoose_1 = require("mongoose");
+/* eslint-disable @typescript-eslint/no-this-alias */
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const mongoose_1 = require("mongoose");
 const config_1 = __importDefault(require("../../config"));
 const user_constant_1 = require("./user.constant");
 const userSchema = new mongoose_1.Schema({
-    id: { type: String, unique: true, required: true },
-    email: { type: String, unique: true, required: true },
-    password: { type: String, required: true, select: 0 },
-    needsPasswordChange: { type: Boolean, default: true },
-    passwordChangedAt: { type: Date },
-    role: { type: String, enum: ['admin', 'student', 'faculty'] },
-    status: { type: String, enum: user_constant_1.UserStatus, default: 'in-progress' },
-    isDeleted: { type: Boolean, default: false }
+    id: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    password: {
+        type: String,
+        required: true,
+        select: 0,
+    },
+    needsPasswordChange: {
+        type: Boolean,
+        default: true,
+    },
+    passwordChangedAt: {
+        type: Date,
+    },
+    role: {
+        type: String,
+        enum: ['superAdmin', 'student', 'faculty', 'admin'],
+    },
+    status: {
+        type: String,
+        enum: user_constant_1.UserStatus,
+        default: 'in-progress',
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false,
+    },
 }, {
-    timestamps: true
+    timestamps: true,
 });
-// pre save middleware / Hook
 userSchema.pre('save', function (next) {
     return __awaiter(this, void 0, void 0, function* () {
-        this.password = yield bcrypt_1.default.hash(this.password, Number(config_1.default.bcrypt_salt_rounds));
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        const user = this; // doc
+        // hashing password and save into DB
+        user.password = yield bcrypt_1.default.hash(user.password, Number(config_1.default.bcrypt_salt_rounds));
         next();
     });
 });
-// post save middleware / hook
+// set '' after saving password
 userSchema.post('save', function (doc, next) {
-    return __awaiter(this, void 0, void 0, function* () {
-        doc.password = '';
-        next();
-    });
+    doc.password = '';
+    next();
 });
 userSchema.statics.isUserExistsByCustomId = function (id) {
     return __awaiter(this, void 0, void 0, function* () {
-        return yield exports.User.findOne({ id: id }).select('+password');
+        return yield exports.User.findOne({ id }).select('+password');
     });
 };
 userSchema.statics.isPasswordMatched = function (plainTextPassword, hashedPassword) {

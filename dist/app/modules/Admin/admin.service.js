@@ -29,7 +29,7 @@ const http_status_1 = __importDefault(require("http-status"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const QueryBuilder_1 = __importDefault(require("../../builder/QueryBuilder"));
 const AppError_1 = __importDefault(require("../../errors/AppError"));
-const user_model_1 = require("../user/user.model");
+const user_model_1 = require("../User/user.model");
 const admin_constant_1 = require("./admin.constant");
 const admin_model_1 = require("./admin.model");
 const getAllAdminsFromDB = (query) => __awaiter(void 0, void 0, void 0, function* () {
@@ -40,7 +40,11 @@ const getAllAdminsFromDB = (query) => __awaiter(void 0, void 0, void 0, function
         .paginate()
         .fields();
     const result = yield adminQuery.modelQuery;
-    return result;
+    const meta = yield adminQuery.countTotal();
+    return {
+        result,
+        meta,
+    };
 });
 const getSingleAdminFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield admin_model_1.Admin.findById(id);

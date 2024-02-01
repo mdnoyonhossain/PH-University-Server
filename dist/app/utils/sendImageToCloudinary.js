@@ -5,17 +5,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.upload = exports.sendImageToCloudinary = void 0;
 const cloudinary_1 = require("cloudinary");
-const config_1 = __importDefault(require("../config"));
-const multer_1 = __importDefault(require("multer"));
 const fs_1 = __importDefault(require("fs"));
+const multer_1 = __importDefault(require("multer"));
+const config_1 = __importDefault(require("../config"));
 cloudinary_1.v2.config({
-    cloud_name: 'deojcyafw',
+    cloud_name: config_1.default.cloudinary_cloud_name,
     api_key: config_1.default.cloudinary_api_key,
-    api_secret: config_1.default.cloudinary_api_secret
+    api_secret: config_1.default.cloudinary_api_secret,
 });
-const sendImageToCloudinary = (path, imageName) => {
+const sendImageToCloudinary = (imageName, path) => {
     return new Promise((resolve, reject) => {
-        cloudinary_1.v2.uploader.upload(path, { public_id: imageName }, function (error, result) {
+        cloudinary_1.v2.uploader.upload(path, { public_id: imageName.trim() }, function (error, result) {
             if (error) {
                 reject(error);
             }
@@ -23,7 +23,7 @@ const sendImageToCloudinary = (path, imageName) => {
             // delete a file asynchronously
             fs_1.default.unlink(path, (err) => {
                 if (err) {
-                    console.error(err);
+                    console.log(err);
                 }
                 else {
                     console.log('File is deleted.');
@@ -35,11 +35,11 @@ const sendImageToCloudinary = (path, imageName) => {
 exports.sendImageToCloudinary = sendImageToCloudinary;
 const storage = multer_1.default.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, process.cwd() + '/uploads');
+        cb(null, process.cwd() + '/uploads/');
     },
     filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
         cb(null, file.fieldname + '-' + uniqueSuffix);
-    }
+    },
 });
 exports.upload = (0, multer_1.default)({ storage: storage });

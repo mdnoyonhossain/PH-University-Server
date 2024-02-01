@@ -19,27 +19,37 @@ const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const enrolledCourse_service_1 = require("./enrolledCourse.service");
 const createEnrolledCourse = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = req.user.userId;
-    const offeredCourse = req.body;
-    const result = yield enrolledCourse_service_1.EnrolledCourseServices.createEnrolledCourseIntoDB(userId, offeredCourse);
+    const result = yield enrolledCourse_service_1.EnrolledCourseServices.createEnrolledCourseIntoDB(userId, req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Student is Enrolled Successfullly',
-        data: result
+        message: 'Student is enrolled succesfully',
+        data: result,
+    });
+}));
+const getMyEnrolledCourses = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const studentId = req.user.userId;
+    const result = yield enrolledCourse_service_1.EnrolledCourseServices.getMyEnrolledCoursesFromDB(studentId, req.query);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Enrolled courses are retrivied succesfully',
+        meta: result.meta,
+        data: result.result,
     });
 }));
 const updateEnrolledCourseMarks = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const facultyId = req.user.userId;
-    const enrolledCourse = req.body;
-    const result = yield enrolledCourse_service_1.EnrolledCourseServices.updateEnrolledCourseMarksIntoDB(facultyId, enrolledCourse);
+    const result = yield enrolledCourse_service_1.EnrolledCourseServices.updateEnrolledCourseMarksIntoDB(facultyId, req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Marks is Updated Successfullly',
-        data: result
+        message: 'Marks is updated succesfully',
+        data: result,
     });
 }));
 exports.EnrolledCourseControllers = {
     createEnrolledCourse,
-    updateEnrolledCourseMarks
+    getMyEnrolledCourses,
+    updateEnrolledCourseMarks,
 };

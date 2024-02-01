@@ -1,39 +1,55 @@
-import { Schema, model } from "mongoose";
-import { TAcademicDepartment } from "./academicDepartment.interface";
-import AppError from "../../errors/AppError";
-import httpStatus from "http-status";
+import httpStatus from 'http-status';
+import { Schema, model } from 'mongoose';
+import AppError from '../../errors/AppError';
+import { TAcademicDepartment } from './academicDepartment.interface';
 
-const academicDepartmentSchema = new Schema<TAcademicDepartment>({
-    name: { type: String, unique: true, required: true },
+const academicDepartmentSchema = new Schema<TAcademicDepartment>(
+  {
+    name: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     academicFaculty: {
-        type: Schema.Types.ObjectId,
-        ref: 'AcademicFaculty'
-    }
-},
-    {
-        timestamps: true
-    }
+      type: Schema.Types.ObjectId,
+      ref: 'AcademicFaculty',
+    },
+  },
+  {
+    timestamps: true,
+  },
 );
 
 academicDepartmentSchema.pre('save', async function (next) {
-    const isDepartmentExists = await AcademicDepartment.findOne({ name: this.name });
-    if (isDepartmentExists) {
-        throw new AppError(httpStatus.NOT_FOUND, 'This Department is Already Exists!');
-    }
+  const isDepartmentExist = await AcademicDepartment.findOne({
+    name: this.name,
+  });
 
-    next();
+  if (isDepartmentExist) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      'This department is already exist!',
+    );
+  }
+
+  next();
 });
 
-// query middleware
 academicDepartmentSchema.pre('findOneAndUpdate', async function (next) {
-    const query = this.getQuery();
-    const isDepartmentExists = await AcademicDepartment.findOne(query);
+  const query = this.getQuery();
+  const isDepartmentExist = await AcademicDepartment.findOne(query);
 
-    if (!isDepartmentExists) {
-        throw new AppError(httpStatus.NOT_FOUND, 'This Department dose not Exists!')
-    }
+  if (!isDepartmentExist) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      'This department does not exist! ',
+    );
+  }
 
-    next();
+  next();
 });
 
-export const AcademicDepartment = model<TAcademicDepartment>('AcademicDepartment', academicDepartmentSchema);
+export const AcademicDepartment = model<TAcademicDepartment>(
+  'AcademicDepartment',
+  academicDepartmentSchema,
+);

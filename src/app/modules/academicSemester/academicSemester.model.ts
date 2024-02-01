@@ -1,43 +1,66 @@
-import { Schema, model } from "mongoose";
-import { TAcademicSemester } from "./academicSemester.interface";
-import { AcademicSemesterCode, AcademicSemesterName, Months } from "./academicSemester.constant";
-import AppError from "../../errors/AppError";
-import httpStatus from "http-status";
+import { Schema, model } from 'mongoose';
+import {
+  AcademicSemesterCode,
+  AcademicSemesterName,
+  Months,
+} from './academicSemester.constant';
+import { TAcademicSemester } from './academicSemester.interface';
 
-const academicSemesterSchema = new Schema<TAcademicSemester>({
-    name: { type: String, enum: AcademicSemesterName, required: true },
-    code: { type: String, enum: AcademicSemesterCode, required: true },
-    year: { type: String, required: true },
-    startMonth: { type: String, enum: Months, required: true },
-    endMonth: { type: String, enum: Months, required: true }
-},
-    {
-        timestamps: true
-    }
+const acdemicSemesterSchema = new Schema<TAcademicSemester>(
+  {
+    name: {
+      type: String,
+      required: true,
+      enum: AcademicSemesterName,
+    },
+    year: {
+      type: String,
+      required: true,
+    },
+    code: {
+      type: String,
+      required: true,
+      enum: AcademicSemesterCode,
+    },
+    startMonth: {
+      type: String,
+      required: true,
+      enum: Months,
+    },
+    endMonth: {
+      type: String,
+      required: true,
+      enum: Months,
+    },
+  },
+  {
+    timestamps: true,
+  },
 );
 
-academicSemesterSchema.pre('save', async function (next) {
-    const isSemesterExists = await AcademicSemester.findOne({
-        name: this.name,
-        year: this.year
-    });
+acdemicSemesterSchema.pre('save', async function (next) {
+  const isSemesterExists = await AcademicSemester.findOne({
+    year: this.year,
+    name: this.name,
+  });
 
-    if (isSemesterExists) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Semester is Already Exists');
-    }
-
-    next();
+  if (isSemesterExists) {
+    throw new Error('Semester is already exists !');
+  }
+  next();
 });
 
-academicSemesterSchema.pre('findOneAndUpdate', async function (next) {
-    const query = this.getQuery();
-    const isSemesterExists = await AcademicSemester.findOne(query);
+export const AcademicSemester = model<TAcademicSemester>(
+  'AcademicSemester',
+  acdemicSemesterSchema,
+);
 
-    if (!isSemesterExists) {
-        throw new AppError(httpStatus.NOT_FOUND, 'This Semester dose not Exists!');
-    }
+// Name Year
+//2030 Autumn => Created
+// 2031 Autumn
+//2030 Autumn => XXX
+//2030 Fall => Created
 
-    next()
-})
-
-export const AcademicSemester = model<TAcademicSemester>('AcademicSemester', academicSemesterSchema)
+// Autumn 01
+// Summer 02
+// Fall 03

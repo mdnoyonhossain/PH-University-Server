@@ -1,16 +1,50 @@
 import express from 'express';
-import { AcademicSemesterControllers } from './academicSemester.controller';
+import auth from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
-import { academicSemesterValidations } from './academicSemester.validation';
+import { USER_ROLE } from '../User/user.constant';
+import { AcademicSemesterControllers } from './academicSemester.controller';
+import { AcademicSemesterValidations } from './academicSemester.validation';
 
 const router = express.Router();
 
-router.post('/create-academic-semester', validateRequest(academicSemesterValidations.academicSemesterValidationSchema), AcademicSemesterControllers.createAcademicSemester);
+router.post(
+  '/create-academic-semester',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
+  validateRequest(
+    AcademicSemesterValidations.createAcdemicSemesterValidationSchema,
+  ),
+  AcademicSemesterControllers.createAcademicSemester,
+);
 
-router.get('/', AcademicSemesterControllers.getAllAcademicSemester);
+router.get(
+  '/:semesterId',
+  auth(
+    USER_ROLE.superAdmin,
+    USER_ROLE.admin,
+    USER_ROLE.faculty,
+    USER_ROLE.student,
+  ),
+  AcademicSemesterControllers.getSingleAcademicSemester,
+);
 
-router.get('/:semesterId', AcademicSemesterControllers.getSingleAcademicSemester);
+router.patch(
+  '/:semesterId',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
+  validateRequest(
+    AcademicSemesterValidations.updateAcademicSemesterValidationSchema,
+  ),
+  AcademicSemesterControllers.updateAcademicSemester,
+);
 
-router.patch('/:semesterId', validateRequest(academicSemesterValidations.updateAcademicSemesterValidationSchema), AcademicSemesterControllers.updateAcademicSemester)
+router.get(
+  '/',
+  auth(
+    USER_ROLE.superAdmin,
+    USER_ROLE.admin,
+    USER_ROLE.faculty,
+    USER_ROLE.student,
+  ),
+  AcademicSemesterControllers.getAllAcademicSemesters,
+);
 
 export const AcademicSemesterRoutes = router;

@@ -13,36 +13,48 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AcademicSemesterServices = void 0;
-const http_status_1 = __importDefault(require("http-status"));
-const AppError_1 = __importDefault(require("../../errors/AppError"));
+const QueryBuilder_1 = __importDefault(require("../../builder/QueryBuilder"));
 const academicSemester_constant_1 = require("./academicSemester.constant");
 const academicSemester_model_1 = require("./academicSemester.model");
 const createAcademicSemesterIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    // semester name --> semester code
     if (academicSemester_constant_1.academicSemesterNameCodeMapper[payload.name] !== payload.code) {
-        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Invalid Semester Code.');
+        throw new Error('Invalid Semester Code');
     }
     const result = yield academicSemester_model_1.AcademicSemester.create(payload);
     return result;
 });
-const getAllAcademicSemesterFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield academicSemester_model_1.AcademicSemester.find();
+const getAllAcademicSemestersFromDB = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const academicSemesterQuery = new QueryBuilder_1.default(academicSemester_model_1.AcademicSemester.find(), query)
+        .search(academicSemester_constant_1.AcademicSemesterSearchableFields)
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
+    const result = yield academicSemesterQuery.modelQuery;
+    const meta = yield academicSemesterQuery.countTotal();
+    return {
+        meta,
+        result,
+    };
+});
+const getSingleAcademicSemesterFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield academicSemester_model_1.AcademicSemester.findById(id);
     return result;
 });
-const getSingleAcademicSemesterFromDB = (semesterId) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield academicSemester_model_1.AcademicSemester.findById(semesterId);
-    return result;
-});
-const updateAcademicSemesterFromDB = (semesterId, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    if (payload.name && payload.code && academicSemester_constant_1.academicSemesterNameCodeMapper[payload.name] !== payload.code) {
-        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Invalid Semester Code');
+const updateAcademicSemesterIntoDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    if (payload.name &&
+        payload.code &&
+        academicSemester_constant_1.academicSemesterNameCodeMapper[payload.name] !== payload.code) {
+        throw new Error('Invalid Semester Code');
     }
-    const result = yield academicSemester_model_1.AcademicSemester.findOneAndUpdate({ _id: semesterId }, payload, { new: true });
+    const result = yield academicSemester_model_1.AcademicSemester.findOneAndUpdate({ _id: id }, payload, {
+        new: true,
+    });
     return result;
 });
 exports.AcademicSemesterServices = {
     createAcademicSemesterIntoDB,
-    getAllAcademicSemesterFromDB,
+    getAllAcademicSemestersFromDB,
     getSingleAcademicSemesterFromDB,
-    updateAcademicSemesterFromDB
+    updateAcademicSemesterIntoDB,
 };

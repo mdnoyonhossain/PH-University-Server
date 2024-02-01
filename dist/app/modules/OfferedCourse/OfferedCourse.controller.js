@@ -18,13 +18,12 @@ const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const OfferedCourse_service_1 = require("./OfferedCourse.service");
 const createOfferedCourse = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const offeredCourse = req.body;
-    const result = yield OfferedCourse_service_1.OfferedCourseServices.createOfferedCourseIntoDB(offeredCourse);
+    const result = yield OfferedCourse_service_1.OfferedCourseServices.createOfferedCourseIntoDB(req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Offered Course is created sucessfully !',
-        data: result
+        message: 'Offered Course is created successfully !',
+        data: result,
     });
 }));
 const getAllOfferedCourses = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -33,7 +32,19 @@ const getAllOfferedCourses = (0, catchAsync_1.default)((req, res) => __awaiter(v
         statusCode: http_status_1.default.OK,
         success: true,
         message: 'OfferedCourses retrieved successfully !',
-        data: result,
+        meta: result.meta,
+        data: result.result,
+    });
+}));
+const getMyOfferedCourses = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const userId = req.user.userId;
+    const result = yield OfferedCourse_service_1.OfferedCourseServices.getMyOfferedCoursesFromDB(userId, req.query);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'OfferedCourses retrieved successfully !',
+        meta: result.meta,
+        data: result.result,
     });
 }));
 const getSingleOfferedCourses = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -48,13 +59,12 @@ const getSingleOfferedCourses = (0, catchAsync_1.default)((req, res) => __awaite
 }));
 const updateOfferedCourse = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const offeredCourse = req.body;
-    const result = yield OfferedCourse_service_1.OfferedCourseServices.updateOfferedCourseIntoDB(id, offeredCourse);
+    const result = yield OfferedCourse_service_1.OfferedCourseServices.updateOfferedCourseIntoDB(id, req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Offered Course is Updated sucessfully !',
-        data: result
+        message: 'OfferedCourse updated successfully',
+        data: result,
     });
 }));
 const deleteOfferedCourseFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -70,6 +80,7 @@ const deleteOfferedCourseFromDB = (0, catchAsync_1.default)((req, res) => __awai
 exports.OfferedCourseControllers = {
     createOfferedCourse,
     getAllOfferedCourses,
+    getMyOfferedCourses,
     getSingleOfferedCourses,
     updateOfferedCourse,
     deleteOfferedCourseFromDB,

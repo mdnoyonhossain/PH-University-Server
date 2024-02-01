@@ -13,34 +13,39 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AcademicDepartment = void 0;
+const http_status_1 = __importDefault(require("http-status"));
 const mongoose_1 = require("mongoose");
 const AppError_1 = __importDefault(require("../../errors/AppError"));
-const http_status_1 = __importDefault(require("http-status"));
 const academicDepartmentSchema = new mongoose_1.Schema({
-    name: { type: String, unique: true, required: true },
+    name: {
+        type: String,
+        required: true,
+        unique: true,
+    },
     academicFaculty: {
         type: mongoose_1.Schema.Types.ObjectId,
-        ref: 'AcademicFaculty'
-    }
+        ref: 'AcademicFaculty',
+    },
 }, {
-    timestamps: true
+    timestamps: true,
 });
 academicDepartmentSchema.pre('save', function (next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const isDepartmentExists = yield exports.AcademicDepartment.findOne({ name: this.name });
-        if (isDepartmentExists) {
-            throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'This Department is Already Exists!');
+        const isDepartmentExist = yield exports.AcademicDepartment.findOne({
+            name: this.name,
+        });
+        if (isDepartmentExist) {
+            throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'This department is already exist!');
         }
         next();
     });
 });
-// query middleware
 academicDepartmentSchema.pre('findOneAndUpdate', function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = this.getQuery();
-        const isDepartmentExists = yield exports.AcademicDepartment.findOne(query);
-        if (!isDepartmentExists) {
-            throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'This Department dose not Exists!');
+        const isDepartmentExist = yield exports.AcademicDepartment.findOne(query);
+        if (!isDepartmentExist) {
+            throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'This department does not exist! ');
         }
         next();
     });

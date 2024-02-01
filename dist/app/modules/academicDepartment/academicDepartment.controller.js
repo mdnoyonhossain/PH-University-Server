@@ -17,23 +17,23 @@ const http_status_1 = __importDefault(require("http-status"));
 const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const academicDepartment_service_1 = require("./academicDepartment.service");
-const createAcademicDepartment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const academicDepartment = req.body;
-    const result = yield academicDepartment_service_1.AcademicDepartmentServices.createAcademicDepartmentIntoDB(academicDepartment);
+const createAcademicDepartmemt = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield academicDepartment_service_1.AcademicDepartmentServices.createAcademicDepartmentIntoDB(req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Academic Department is Created Successfully',
-        data: result
+        message: 'Academic department is created succesfully',
+        data: result,
     });
 }));
-const getAllAcademicDepartment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield academicDepartment_service_1.AcademicDepartmentServices.getAllAcademicDepartmentFromDB();
+const getAllAcademicDepartments = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield academicDepartment_service_1.AcademicDepartmentServices.getAllAcademicDepartmentsFromDB(req.query);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Academic Department is retrived Successfully',
-        data: result
+        message: 'Academic departments are retrieved successfully',
+        meta: result.meta,
+        data: result.result,
     });
 }));
 const getSingleAcademicDepartment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -42,24 +42,23 @@ const getSingleAcademicDepartment = (0, catchAsync_1.default)((req, res) => __aw
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Academic Department are retrieved Successfully',
-        data: result
+        message: 'Academic department is retrieved succesfully',
+        data: result,
     });
 }));
-const updateAcademicDepartment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateAcademicDeartment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { departmentId } = req.params;
-    const department = req.body;
-    const result = yield academicDepartment_service_1.AcademicDepartmentServices.updateAcademicDepartmentIntoDB(departmentId, department);
+    const result = yield academicDepartment_service_1.AcademicDepartmentServices.updateAcademicDepartmentIntoDB(departmentId, req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Academic Department is Updated Successfully',
-        data: result
+        message: 'Academic department is updated succesfully',
+        data: result,
     });
 }));
 exports.AcademicDepartmentControllers = {
-    createAcademicDepartment,
-    getAllAcademicDepartment,
+    createAcademicDepartmemt,
+    getAllAcademicDepartments,
     getSingleAcademicDepartment,
-    updateAcademicDepartment
+    updateAcademicDeartment,
 };

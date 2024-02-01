@@ -25,20 +25,29 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FacultyServices = void 0;
 /* eslint-disable @typescript-eslint/no-explicit-any */
+const http_status_1 = __importDefault(require("http-status"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const QueryBuilder_1 = __importDefault(require("../../builder/QueryBuilder"));
+const AppError_1 = __importDefault(require("../../errors/AppError"));
+const user_model_1 = require("../User/user.model");
 const faculty_constant_1 = require("./faculty.constant");
 const faculty_model_1 = require("./faculty.model");
-const AppError_1 = __importDefault(require("../../errors/AppError"));
-const http_status_1 = __importDefault(require("http-status"));
-const user_model_1 = require("../user/user.model");
-const getAllFacultyFromDB = (query) => __awaiter(void 0, void 0, void 0, function* () {
-    const facultyQuery = new QueryBuilder_1.default(faculty_model_1.Faculty.find().populate('academicDepartment'), query).search(faculty_constant_1.FacultySearchableFields).filter().sort().paginate().fields();
+const getAllFacultiesFromDB = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const facultyQuery = new QueryBuilder_1.default(faculty_model_1.Faculty.find().populate('academicDepartment academicFaculty'), query)
+        .search(faculty_constant_1.FacultySearchableFields)
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
     const result = yield facultyQuery.modelQuery;
-    return result;
+    const meta = yield facultyQuery.countTotal();
+    return {
+        meta,
+        result,
+    };
 });
 const getSingleFacultyFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield faculty_model_1.Faculty.findById(id).populate('academicDepartment');
+    const result = yield faculty_model_1.Faculty.findById(id).populate('academicDepartment academicFaculty');
     return result;
 });
 const updateFacultyIntoDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
@@ -80,8 +89,8 @@ const deleteFacultyFromDB = (id) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.FacultyServices = {
-    getAllFacultyFromDB,
+    getAllFacultiesFromDB,
     getSingleFacultyFromDB,
     updateFacultyIntoDB,
-    deleteFacultyFromDB
+    deleteFacultyFromDB,
 };
